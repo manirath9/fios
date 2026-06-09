@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIOS — Operations Console (Concept Prototype)</title>
+<style>
+  :root{
+    --bg:#0a0a0c; --surface:#121218; --surface2:#1a1a22; --surface3:#22222c;
+    --border:#2b2b36; --border2:#3a3a47;
+    --gold:#e8c97d; --gold-dim:#b9974f; --cyan:#6ad7e6;
+    --text:#eceaf0; --muted:#9a9aa8; --faint:#6b6b78;
+    --green:#54e09b; --amber:#f6bf52; --red:#f87171; --blue:#7aa2f7;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow:hidden}
+  .flower{position:fixed;inset:0;pointer-events:none;opacity:.04;background-image:radial-gradient(circle, var(--gold) 0 1px, transparent 1px);background-size:40px 40px;z-index:0}
+  ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+
+  header{display:flex;align-items:center;gap:18px;padding:12px 22px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#101016,#0c0c11);position:relative;z-index:5}
+  .brand{display:flex;align-items:center;gap:12px}
+  .seed{width:34px;height:34px;flex:0 0 34px}
+  .brand h1{font-size:16px;font-weight:700;letter-spacing:.3px;display:flex;align-items:baseline;gap:9px}
+  .brand h1 .tm{font-size:9px;color:var(--gold);transform:translateY(-6px)}
+  .brand .sub{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.4px}
+  .proto{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .proto .warn{font-size:10px;font-weight:700;letter-spacing:.6px;color:#1a1408;background:var(--amber);padding:4px 11px;border-radius:5px}
+  .clock{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .askbtn{font-size:12.5px;font-weight:600;color:#0c0c11;background:linear-gradient(180deg,var(--gold),var(--gold-dim));border:none;padding:8px 14px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .askbtn:hover{filter:brightness(1.08)}
+
+  .app{display:grid;grid-template-columns:380px 1fr;height:calc(100vh - 60px);position:relative;z-index:1}
+  .left{border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0;background:#0d0d12}
+  .right{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+  .lhead{padding:14px 18px 10px;display:flex;align-items:center;justify-content:space-between}
+  .lhead .t{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+  .lhead .c{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .filters{display:flex;gap:6px;padding:0 16px 12px}
+  .chip{font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:5px 11px;border-radius:20px;cursor:pointer;white-space:nowrap;transition:.12s}
+  .chip:hover{border-color:var(--border2)}
+  .chip.on{color:var(--text);background:var(--surface3);border-color:var(--border2)}
+  .chip .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .blotter{overflow-y:auto;flex:1;padding:0 10px 16px}
+  .trow{padding:11px 13px;border-radius:9px;cursor:pointer;border:1px solid transparent;margin-bottom:3px;transition:.1s}
+  .trow:hover{background:var(--surface)}
+  .trow.sel{background:var(--surface2);border-color:var(--border2)}
+  .trow .r1{display:flex;align-items:center;gap:9px;margin-bottom:3px}
+  .trow .inst{font-weight:650;font-size:13.5px}
+  .trow .tag{margin-left:auto;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:2px 7px;border-radius:4px}
+  .trow .r2{font-size:11.5px;color:var(--muted);font-family:var(--mono);display:flex;gap:8px}
+  .trow .r2 .id{color:var(--faint)}
+  .sdot{width:8px;height:8px;border-radius:50%;flex:0 0 8px}
+  .s-healthy{background:var(--green)} .s-warning{background:var(--amber)} .s-break{background:var(--red)}
+  .tag.s-healthy{background:rgba(84,224,155,.13);color:var(--green)}
+  .tag.s-warning{background:rgba(246,191,82,.13);color:var(--amber)}
+  .tag.s-break{background:rgba(248,113,113,.14);color:var(--red)}
+
+  .dempty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--faint);gap:14px}
+  .detail{overflow-y:auto;flex:1;padding:0 0 40px}
+  .dhead{padding:20px 26px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#101015,#0d0d12);position:sticky;top:0;z-index:3}
+  .dhead .top{display:flex;align-items:flex-start;gap:14px}
+  .dhead h2{font-size:21px;font-weight:700;letter-spacing:.2px}
+  .dhead .meta{font-size:12px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+  .dhead .right-tag{margin-left:auto;text-align:right}
+  .prob{font-size:30px;font-weight:800;line-height:1;font-family:var(--mono)}
+  .prob.s-break{color:var(--red)} .prob.s-warning{color:var(--amber)} .prob.s-healthy{color:var(--green)}
+  .prob-l{font-size:10px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-top:4px}
+
+  .sec{padding:22px 26px;border-bottom:1px solid var(--border)}
+  .sec h3{font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .sec h3 .n{font-family:var(--mono);color:var(--faint);font-weight:600}
+  .sec h3 .hint{color:var(--faint);font-weight:500;text-transform:none;letter-spacing:0;font-size:11px}
+
+  .timeline{display:flex;align-items:flex-start;gap:0;position:relative}
+  .stage{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;z-index:2}
+  .stage .node{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:2px solid var(--border2);background:var(--surface);margin-bottom:9px}
+  .stage.done .node{border-color:var(--green);color:var(--green);background:rgba(84,224,155,.1)}
+  .stage.warning .node{border-color:var(--amber);color:var(--amber);background:rgba(246,191,82,.1)}
+  .stage.fail .node{border-color:var(--red);color:var(--red);background:rgba(248,113,113,.12);box-shadow:0 0 0 4px rgba(248,113,113,.08)}
+  .stage.pending .node{border-style:dashed;color:var(--faint)}
+  .stage .sn{font-size:11.5px;font-weight:600}
+  .stage .st{font-size:10px;color:var(--faint);font-family:var(--mono);margin-top:2px}
+  .tbar{position:absolute;top:15px;left:8%;right:8%;height:2px;background:var(--border2);z-index:1}
+
+  .sim{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:16px 18px}
+  .sim .h{font-size:12px;color:var(--muted);margin-bottom:13px}
+  .sim .h b{color:var(--gold)}
+  .simflow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .simnode{font-size:11px;padding:7px 11px;border-radius:7px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;gap:7px;font-family:var(--mono)}
+  .simnode.ok{border-color:rgba(84,224,155,.35)} .simnode.ok .d{background:var(--green)}
+  .simnode.bad{border-color:var(--red);background:rgba(248,113,113,.07)} .simnode.bad .d{background:var(--red)}
+  .simnode .d{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+  .simarrow{color:var(--faint);font-size:14px}
+
+  .ai{background:linear-gradient(135deg,rgba(232,201,125,.06),rgba(106,215,230,.04));border:1px solid var(--gold-dim);border-radius:12px;padding:18px 20px}
+  .ai .ahead{display:flex;align-items:center;gap:11px;margin-bottom:14px;flex-wrap:wrap}
+  .ai .badge{font-size:9px;font-weight:800;letter-spacing:1px;color:#0c0c11;background:var(--gold);padding:3px 8px;border-radius:5px}
+  .ai .ah-t{font-size:15px;font-weight:700}
+  .ai .ddl{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--red);font-weight:600}
+  .ai .grid{display:grid;gap:12px}
+  .ai .row{display:grid;grid-template-columns:88px 1fr;gap:14px;align-items:start}
+  .ai .row .k{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);padding-top:2px}
+  .ai .row .v{font-size:13px;color:var(--text);line-height:1.55}
+  .ai .fix{color:var(--green)}
+  .ai .actions{margin-top:16px;display:flex;gap:9px;flex-wrap:wrap}
+  .btn{font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:7px;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
+  .btn.primary{background:linear-gradient(180deg,var(--green),#3aa876);color:#06140d;border:none}
+  .btn:hover{filter:brightness(1.08)}
+
+  .lenstabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px}
+  .lenstab{font-size:11.5px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:7px 13px;border-radius:7px;cursor:pointer;transition:.12s}
+  .lenstab:hover{border-color:var(--border2)}
+  .lenstab.on{color:#0c0c11;background:var(--cyan);border-color:var(--cyan);font-weight:650}
+  .lensbody{background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden}
+  .lenscap{padding:10px 16px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2)}
+  .lenscap b{color:var(--cyan)} .lenscap i{color:var(--faint)}
+  .kv{display:grid;grid-template-columns:1fr 1fr}
+  .kv .cell{padding:13px 16px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
+  .kv .cell:nth-child(2n){border-right:none}
+  .kv .cell .k{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .kv .cell .v{font-size:14px;font-weight:600;font-family:var(--mono)}
+
+  .ge{background:#0c0c10;border:1px solid var(--border);border-radius:11px;padding:16px 18px;font-family:var(--mono);font-size:12px;line-height:1.7;overflow-x:auto}
+  .ge .line{white-space:pre}
+  .ge .key{color:var(--cyan)} .ge .str{color:var(--gold)} .ge .num{color:var(--green)} .ge .pun{color:var(--faint)} .ge .cm{color:var(--faint);font-style:italic}
+
+  .note{font-size:11.5px;color:var(--faint);margin-top:13px;line-height:1.5}
+  .note b{color:var(--muted)}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:20;opacity:0;pointer-events:none;transition:.18s}
+  .overlay.on{opacity:1;pointer-events:auto}
+  .assistant{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:92vw;background:#0e0e13;border-left:1px solid var(--border2);z-index:21;transform:translateX(100%);transition:.22s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+  .assistant.on{transform:none}
+  .ahd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px}
+  .ahd .seed{width:26px;height:26px}
+  .ahd .tt{font-size:14px;font-weight:700}
+  .ahd .ss{font-size:10.5px;color:var(--muted)}
+  .ahd .x{margin-left:auto;cursor:pointer;color:var(--muted);font-size:22px;line-height:1}
+  .achat{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+  .msg{max-width:90%}
+  .msg.u{align-self:flex-end;background:var(--surface3);border:1px solid var(--border2);padding:9px 13px;border-radius:12px 12px 3px 12px;font-size:13px}
+  .msg.a{align-self:flex-start;font-size:13px;line-height:1.6}
+  .msg.a .av{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+  .msg.a .bubble{background:var(--surface);border:1px solid var(--border);padding:12px 14px;border-radius:3px 12px 12px 12px}
+  .msg.a .bubble b{color:var(--text)} .msg.a .bubble .fix{color:var(--green)}
+  .msg.a .resref{margin-top:9px;display:flex;flex-direction:column;gap:5px}
+  .msg.a .rr{font-size:11.5px;font-family:var(--mono);color:var(--muted);padding:6px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;display:flex;gap:8px;align-items:center}
+  .msg.a .rr:hover{border-color:var(--border2)} .msg.a .rr b{color:var(--cyan)}
+  .sugg{padding:0 20px 12px;display:flex;flex-direction:column;gap:7px}
+  .sugg .s{font-size:12px;color:var(--cyan);background:rgba(106,215,230,.06);border:1px solid rgba(106,215,230,.2);padding:9px 12px;border-radius:8px;cursor:pointer}
+  .sugg .s:hover{background:rgba(106,215,230,.1)}
+  .ain{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:9px}
+  .ain input{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:10px 13px;color:var(--text);font-size:13px;font-family:var(--sans)}
+  .ain input:focus{outline:none;border-color:var(--gold-dim)}
+  .ain button{background:var(--gold);border:none;border-radius:8px;width:40px;cursor:pointer;color:#0c0c11;font-size:16px}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f1a13;border:1px solid var(--green);color:#bff5d8;padding:12px 18px;border-radius:9px;font-size:13px;z-index:50;max-width:560px;box-shadow:0 8px 30px rgba(0,0,0,.5);transition:opacity .4s}
+  @media(max-width:980px){.app{grid-template-columns:1fr}.left{display:none}}
+</style>
+</head>
+<body>
+<div class="flower"></div>
+
+<header>
+  <div class="brand">
+    <svg class="seed" viewBox="0 0 100 100" fill="none" stroke="#e8c97d" stroke-width="1.4">
+      <circle cx="50" cy="50" r="15"/><circle cx="50" cy="35" r="15"/><circle cx="50" cy="65" r="15"/>
+      <circle cx="37" cy="42.5" r="15"/><circle cx="63" cy="42.5" r="15"/><circle cx="37" cy="57.5" r="15"/><circle cx="63" cy="57.5" r="15"/>
+    </svg>
+    <div>
+      <h1>FIOS<span class="tm">™</span> <span class="sub">Operations Console</span></h1>
+      <div class="sub" style="font-size:10px;letter-spacing:.3px">Financial Infrastructure Operating System</div>
+    </div>
+  </div>
+  <div class="proto">
+    <span class="clock" id="clock">14:18:02 ET</span>
+    <span class="warn">CONCEPT PROTOTYPE · SYNTHETIC DATA</span>
+    <button class="askbtn" id="askbtn">✦ Ask FIOS</button>
+  </div>
+</header>
+
+<div class="app">
+  <div class="left">
+    <div class="lhead"><span class="t">Trade Blotter</span><span class="c" id="bcount"></span></div>
+    <div class="filters" id="filters"></div>
+    <div class="blotter" id="blotter"></div>
+  </div>
+  <div class="right" id="right"></div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="assistant" id="assistant">
+  <div class="ahd">
+    <svg class="seed" viewBox="0 0 100 100" fill="none" stroke="#e8c97d" stroke-width="2"><circle cx="50" cy="50" r="15"/><circle cx="50" cy="35" r="15"/><circle cx="50" cy="65" r="15"/><circle cx="37" cy="42.5" r="15"/><circle cx="63" cy="42.5" r="15"/><circle cx="37" cy="57.5" r="15"/><circle cx="63" cy="57.5" r="15"/></svg>
+    <div><div class="tt">Ask FIOS</div><div class="ss">AI Operations Assistant</div></div>
+    <div class="x" id="aclose">×</div>
+  </div>
+  <div class="achat" id="achat"></div>
+  <div class="sugg" id="sugg"></div>
+  <div class="ain"><input id="ainput" placeholder="Ask about today's operations…"><button id="asend">➤</button></div>
+</aside>
+
+<script>
+"use strict";
+// Safe DOM builder — createElement + textContent only, never innerHTML.
+function h(tag, props){
+  const e=document.createElement(tag);
+  if(props) for(const k in props){
+    const v=props[k];
+    if(k==='class')e.className=v;
+    else if(k==='text')e.textContent=v;
+    else if(k==='style')e.setAttribute('style',v);
+    else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2).toLowerCase(),v);
+    else e.setAttribute(k,v);
+  }
+  for(let i=2;i<arguments.length;i++)append(e,arguments[i]);
+  return e;
+}
+function append(e,kid){
+  if(kid==null||kid===false)return;
+  if(Array.isArray(kid)){kid.forEach(k=>append(e,k));return;}
+  e.append(kid.nodeType?kid:document.createTextNode(String(kid)));
+}
+function mount(id,node){const c=document.getElementById(id);c.replaceChildren(node);}
+// **bold** → safe <b> spans, no innerHTML
+function rich(s){return s.split('**').map((p,i)=> i%2 ? h('b',{text:p}) : document.createTextNode(p));}
+
+const TRADES=[
+ {id:'EVT-SXF-100482',inst:'SXF Sep-26',desc:'S&P/TSX 60 Index Future · Montréal Exchange',side:'BUY',qty:250,price:1284.40,ccy:'CAD',
+  cpty:'Meridian Global Fund',lei:'5493001KJTIIGC8Y1R12',acct:'GIVE-UP 450',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100482',cfi:'FFIXSX',mult:200,
+  status:'break',prob:97,
+  lifecycle:[['Executed','done','14:02:11'],['Allocated','warning','14:05:33'],['Give-Up','fail','—'],['Cleared','pending','—'],['Booked','pending','—'],['Settled','pending','—']],
+  ai:{head:'97% break probability — missing give-up account',ddl:'15:30 give-up cut-off',
+    cause:'The trade is flagged for **give-up** to carrying broker BNS-CLEAR, but no give-up account / agreement is resolved on the golden event. CDCC will route the position to the executing broker’s **buffer account** at the 15:30 cut-off.',
+    impact:'Position lands in the buffer account → a **front-vs-back position break** tomorrow AM → manual give-up correction + a CDCC adjustment. ~45 min investigation, plus reg-report amendment risk.',
+    fix:'Resolve give-up account 450 (carrying broker BNS-CLEAR; **take-up** confirmed) on the golden event before 15:30. FIOS propagates it to clearing, booking and the CIRO / NI 96-101 obligation automatically — **one fix, every downstream output.**'},
+  sim:[['Golden Event','ok'],['Validation','ok'],['Give-Up Resolve','bad'],['CDCC Clearing','bad'],['Sub-Ledger','bad'],['Reg Report','bad']],oblig:['CIRO Trade Reporting','NI 96-101']},
+
+ {id:'EVT-BAX-100455',inst:'BAX Dec-26',desc:'3-Month CORRA Future · Montréal Exchange',side:'SELL',qty:500,price:97.12,ccy:'CAD',
+  cpty:'Laurentian Rates Desk',lei:'549300ZK8N4FQ2L1XX',acct:'HOUSE-22',book:'FI-RATES-03',venue:'MX',ccp:'CDCC',uti:'CA549300…100455',cfi:'FFIXRS',mult:2500,
+  status:'warning',prob:34,
+  lifecycle:[['Executed','done','13:48:02'],['Allocated','warning','13:52:40'],['Give-Up','done','13:53:11'],['Cleared','done','13:55:07'],['Booked','pending','—'],['Settled','pending','—']],
+  ai:{head:'34% break probability — allocation quantity mismatch',ddl:'EOD booking',
+    cause:'Allocation splits across two sub-accounts (300 / 180) total **480**, but the executed quantity is **500**. A 20-lot residual is unallocated on the golden event.',
+    impact:'If unresolved, the 20-lot residual books to a **suspense account** → a sub-ledger break and a P&L mis-statement on the desk tonight.',
+    fix:'Confirm the allocation for the residual 20 lots (suggested: HOUSE-22). FIOS revalidates and books the corrected projection — **no re-keying downstream.**'},
+  sim:[['Golden Event','ok'],['Validation','ok'],['Allocation','bad'],['Sub-Ledger','bad'],['Settlement','ok'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
+
+ {id:'EVT-OCX-100501',inst:'RY 145C Oct-26',desc:'Royal Bank Equity Call Option · Montréal Exchange',side:'BUY',qty:120,price:3.85,ccy:'CAD',
+  cpty:'Northwater Capital',lei:'549300AB12CD34EF56GH',acct:'CLIENT-7781',book:'EQ-OPT-02',venue:'MX',ccp:'CDCC',uti:'CA549300…100501',cfi:'OCASPS',mult:100,
+  status:'break',prob:91,
+  lifecycle:[['Executed','done','14:11:55'],['Allocated','done','14:12:20'],['Give-Up','done','14:12:48'],['Cleared','fail','—'],['Booked','pending','—'],['Settled','pending','—']],
+  ai:{head:'91% break probability — stale product reference data',ddl:'CDCC clearing window',
+    cause:'The option series multiplier on the legacy booking feed is **stale (100)** versus the CDCC-effective contract adjustment from a recent **corporate action**. The golden event carries the corrected term; the booking feed does not.',
+    impact:'Cleared notional and margin (**MERIS**) will mismatch CDCC by the multiplier delta → a margin-call dispute and a cleared-vs-booked break.',
+    fix:'FIOS already holds the corrected **Product entity** (post corporate-action). Publish the golden event to the booking adapter to overwrite the stale multiplier — the validation gate then passes.'},
+  sim:[['Golden Event','ok'],['Validation','ok'],['Product Ref','bad'],['CDCC Margin','bad'],['Booking','bad'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
+
+ {id:'EVT-SXF-100509',inst:'SXF Sep-26',desc:'S&P/TSX 60 Index Future · Montréal Exchange',side:'SELL',qty:80,price:1284.60,ccy:'CAD',
+  cpty:'Meridian Global Fund',lei:'5493001KJTIIGC8Y1R12',acct:'GIVE-UP 450',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100509',cfi:'FFIXSX',mult:200,
+  status:'healthy',prob:2,
+  lifecycle:[['Executed','done','14:14:01'],['Allocated','done','14:14:25'],['Give-Up','done','14:14:51'],['Cleared','done','14:16:33'],['Booked','done','14:16:40'],['Settled','done','14:17:02']],
+  ai:null,sim:[['Golden Event','ok'],['Validation','ok'],['Give-Up','ok'],['CDCC Clearing','ok'],['Sub-Ledger','ok'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
+
+ {id:'EVT-CGB-100460',inst:'CGB Dec-26',desc:'10-Year Gov’t of Canada Bond Future · MX',side:'BUY',qty:300,price:122.45,ccy:'CAD',
+  cpty:'Laurentian Rates Desk',lei:'549300ZK8N4FQ2L1XX',acct:'HOUSE-22',book:'FI-RATES-03',venue:'MX',ccp:'CDCC',uti:'CA549300…100460',cfi:'FFIXRS',mult:1000,
+  status:'healthy',prob:4,
+  lifecycle:[['Executed','done','13:30:10'],['Allocated','done','13:31:00'],['Give-Up','done','13:31:22'],['Cleared','done','13:33:05'],['Booked','done','13:33:11'],['Settled','done','13:33:40']],
+  ai:null,sim:[['Golden Event','ok'],['Validation','ok'],['Clearing','ok'],['Sub-Ledger','ok'],['Settlement','ok'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
+
+ {id:'EVT-SXM-100488',inst:'SXM Sep-26',desc:'Mini S&P/TSX 60 Index Future · MX',side:'BUY',qty:140,price:128.44,ccy:'CAD',
+  cpty:'Northwater Capital',lei:'549300AB12CD34EF56GH',acct:'CLIENT-7781',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100488',cfi:'FFIXSX',mult:20,
+  status:'warning',prob:28,
+  lifecycle:[['Executed','done','14:06:44'],['Allocated','done','14:07:10'],['Give-Up','warning','14:08:01'],['Cleared','done','14:09:30'],['Booked','done','14:09:38'],['Settled','pending','—']],
+  ai:{head:'28% break probability — counterparty SSI not yet confirmed',ddl:'T+1 settlement',
+    cause:'The standing settlement instruction (**SSI**) for client CLIENT-7781 is pending re-confirmation after a custodian change. The golden event flags the SSI as **provisional**.',
+    impact:'Low-probability settlement delay at T+1 if the SSI is not confirmed; **no clearing impact**.',
+    fix:'Confirm the updated custodian SSI on the **Account entity**. FIOS re-derives the settlement-instruction projection automatically.'},
+  sim:[['Golden Event','ok'],['Validation','ok'],['Clearing','ok'],['SSI Resolve','bad'],['Settlement','bad'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
+];
+
+const LENSES={
+ 'Front Office':{accent:'execution & P&L',rows:t=>[['Side / Qty',t.side+' '+t.qty],['Price',t.price.toFixed(2)+' '+t.ccy],['Notional',fmtN(t)],['Live P&L',(t.status==='healthy'?'+':'')+pnl(t)+' '+t.ccy],['Net Position',(t.side==='BUY'?'+':'-')+t.qty+' lots'],['Desk',t.book]]},
+ 'Middle Office':{accent:'validation & allocation',rows:t=>[['Validation',t.status==='break'?'FAILED':'PASSED'],['Allocation',t.id.indexOf('BAX')>-1?'480 / 500 (−20)':t.status==='healthy'?'Fully allocated':'Confirmed'],['Give-Up / Take-Up',gu(t)],['Open Exceptions',t.status==='healthy'?'0':'1'],['Confirm Status',t.status==='healthy'?'Affirmed':'Pending'],['Control',t.status==='break'?'Held':'Released']]},
+ 'Back Office':{accent:'settlement & accounting',rows:t=>[['Settlement',t.status==='healthy'?'Instructed':'On hold'],['Value Date','T+1'],['Cash Movement',fmtN(t)+' '+t.ccy],['Accounting Entry',t.status==='break'?'Suspense':'Posted (proj.)'],['Custodian',t.acct.indexOf('CLIENT')>-1?'CDS / Custodian':'House'],['Sub-Ledger',t.status==='break'?'Break':'Reconciled (internal)']]},
+ 'Risk':{accent:'exposure & margin',rows:t=>[['Exposure',fmtN(t)+' '+t.ccy],['Initial Margin (MERIS)',m(notional(t)*0.062)+' '+t.ccy],['Variation Margin',(t.status==='healthy'?'+':'')+m(notional(t)*0.003)+' '+t.ccy],['Δ Sensitivity',t.cfi[0]==='O'?'0.52 / contract':'1.00 (linear)'],['Limit Usage',(20+(t.qty%37))+'% of desk'],['Stress (−10%)','−'+m(notional(t)*0.1)+' '+t.ccy]]},
+ 'Compliance':{accent:'obligations & surveillance',rows:t=>[['Reg Obligation','CIRO TR'],['Derivatives Data','NI 96-101'],['Report Status',t.status==='break'?'Blocked (pre-fix)':'Ready'],['Surveillance','No flag'],['Lineage','Golden event → report'],['Amendment Risk',t.status==='break'?'High':'None']]},
+ 'Finance':{accent:'ledger, revenue & tax',rows:t=>[['GL Posting',t.status==='break'?'Suspense 999':'GL 1420 (proj.)'],['Commission',m(t.qty*1.25)+' '+t.ccy],['Exchange Fees',m(t.qty*0.45)+' '+t.ccy],['Revenue',t.status==='healthy'?m(t.qty*1.25)+' '+t.ccy:'Pending'],['Tax Treatment','Mark-to-market'],['Booking Entity','Manera (LEI 5493…)']]},
+};
+function notional(t){return t.qty*t.price*t.mult;}
+function m(x){return '$'+Math.round(x).toLocaleString();}
+function fmtN(t){return m(notional(t));}
+function pnl(t){return (t.status==='healthy'?Math.round(notional(t)*0.004):-Math.round(notional(t)*0.002)).toLocaleString();}
+function gu(t){return t.acct.indexOf('GIVE-UP')>-1 ? (t.status==='break'?'Unresolved → buffer':'BNS-CLEAR (take-up ✓)') : 'N/A (house)';}
+
+let state={sel:TRADES[0].id,lens:'Front Office',filter:'all'};
+const SYM={done:'✓',warning:'!',fail:'✕',pending:'·'};
+
+const FILTERS=[['all','All',''],['break','Will break','s-break'],['warning','At risk','s-warning'],['healthy','Clean','s-healthy']];
+function renderFilters(){
+  mount('filters', h('div',{style:'display:flex;gap:6px'},
+    FILTERS.map(f=>h('div',{class:'chip'+(state.filter===f[0]?' on':''),onclick:()=>{state.filter=f[0];renderFilters();renderBlotter();}},
+      f[2]?h('span',{class:'dot '+f[2]}):null, f[1]))));
+}
+function visible(){return state.filter==='all'?TRADES:TRADES.filter(t=>t.status===state.filter);}
+function renderBlotter(){
+  const list=visible();
+  document.getElementById('bcount').textContent=list.length+' / '+TRADES.length+' events';
+  mount('blotter', h('div',{}, list.map(t=>
+    h('div',{class:'trow'+(state.sel===t.id?' sel':''),onclick:()=>select(t.id)},
+      h('div',{class:'r1'}, h('span',{class:'sdot s-'+t.status}), h('span',{class:'inst',text:t.inst}),
+        h('span',{class:'tag s-'+t.status,text:t.status==='break'?t.prob+'% break':t.status==='warning'?t.prob+'% risk':'clean'})),
+      h('div',{class:'r2'}, h('span',{text:t.side+' '+t.qty}), h('span',{text:'·'}), h('span',{text:t.cpty})),
+      h('div',{class:'r2'}, h('span',{class:'id',text:t.id}))))));
+}
+function select(id){state.sel=id;state.lens='Front Office';renderBlotter();renderDetail();}
+function trade(){return TRADES.find(t=>t.id===state.sel);}
+
+function renderDetail(){
+  const t=trade();
+  if(!t){mount('right',h('div',{class:'dempty'},'Select a trade'));return;}
+  let n=t.ai?2:1;
+  const secs=[];
+  secs.push(h('div',{class:'sec'},
+    h('h3',{}, h('span',{class:'n',text:'01'}),' Trade Lifecycle ', h('span',{class:'hint',text:'— one event, one truth, end to end'})),
+    timeline(t)));
+  if(t.ai)secs.push(h('div',{class:'sec'}, h('h3',{}, h('span',{class:'n',text:'02'}),' AI Exception Explainer'), aiBox(t)));
+  secs.push(h('div',{class:'sec'}, h('h3',{}, h('span',{class:'n',text:t.ai?'03':'02'}),' Digital Twin — Downstream Simulation ', h('span',{class:'hint',text:'— before it reaches clearing'})), simBox(t)));
+  secs.push(h('div',{class:'sec'}, h('h3',{}, h('span',{class:'n',text:t.ai?'04':'03'}),' Department Lenses ', h('span',{class:'hint',text:'— same golden event, every desk’s view'})), lensBox(t)));
+  secs.push(h('div',{class:'sec',style:'border-bottom:none'},
+    h('h3',{}, h('span',{class:'n',text:t.ai?'05':'04'}),' Golden Financial Event ', h('span',{class:'hint',text:'— the single stored truth; everything above is a projection of it'})),
+    geBox(t),
+    h('div',{class:'note'}, rich('**Entity · Event · Projection.** FIOS stores only the validated Financial Event and the reference Entities (LEI, account, product, give-up agreement, obligation). Position, P&L, margin, settlement instruction, ledger entry and the regulatory report are all **derived** from it on demand — never copied. This is why **internal** reconciliation disappears; **external** reconciliation to CDCC / custodians is **reduced** to one clean-source check.'))));
+
+  mount('right', h('div',{class:'detail'},
+    h('div',{class:'dhead'}, h('div',{class:'top'},
+      h('div',{}, h('h2',{text:t.inst}), h('div',{class:'meta',text:t.desc}),
+        h('div',{class:'meta',style:'margin-top:6px',text:t.id+' · '+t.side+' '+t.qty+' @ '+t.price.toFixed(2)+' '+t.ccy+' · '+t.cpty})),
+      h('div',{class:'right-tag'}, h('div',{class:'prob s-'+t.status,text:t.status==='healthy'?'✓':t.prob+'%'}),
+        h('div',{class:'prob-l',text:t.status==='healthy'?'clean · settled':'break probability'})))),
+    secs));
+}
+function timeline(t){
+  return h('div',{class:'timeline'}, h('div',{class:'tbar'}),
+    t.lifecycle.map(s=>h('div',{class:'stage '+s[1]}, h('div',{class:'node',text:SYM[s[1]]}), h('div',{class:'sn',text:s[0]}), h('div',{class:'st',text:s[2]}))));
+}
+function aiBox(t){
+  return h('div',{class:'ai'},
+    h('div',{class:'ahead'}, h('span',{class:'badge',text:'FIOS AI'}), h('span',{class:'ah-t',text:t.ai.head}), h('span',{class:'ddl',text:'⏱ '+t.ai.ddl})),
+    h('div',{class:'grid'},
+      h('div',{class:'row'}, h('div',{class:'k',text:'Cause'}), h('div',{class:'v'}, rich(t.ai.cause))),
+      h('div',{class:'row'}, h('div',{class:'k',text:'Impact'}), h('div',{class:'v'}, rich(t.ai.impact))),
+      h('div',{class:'row'}, h('div',{class:'k',text:'Fix'}), h('div',{class:'v fix'}, rich(t.ai.fix)))),
+    h('div',{class:'actions'}, h('button',{class:'btn primary',text:'Apply fix on golden event',onclick:()=>resolve(t.id)}), h('button',{class:'btn',text:'Assign to ops queue'})));
+}
+function simBox(t){
+  const flow=[];
+  t.sim.forEach((s,i)=>{ if(i)flow.push(h('span',{class:'simarrow',text:'→'})); flow.push(h('div',{class:'simnode '+s[1]}, h('span',{class:'d'}), s[0])); });
+  return h('div',{class:'sim'},
+    h('div',{class:'h'}, rich('FIOS simulates the event’s full downstream journey at point-of-capture and flags the break **before** it propagates:')),
+    h('div',{class:'simflow'}, flow));
+}
+function lensBox(t){
+  const tabs=Object.keys(LENSES).map(l=>h('div',{class:'lenstab'+(state.lens===l?' on':''),text:l,onclick:()=>{state.lens=l;renderDetail();}}));
+  const L=LENSES[state.lens];
+  const cells=L.rows(t).map(r=>h('div',{class:'cell'}, h('div',{class:'k',text:r[0]}), h('div',{class:'v',text:r[1]})));
+  return h('div',{},
+    h('div',{class:'lenstabs'}, tabs),
+    h('div',{class:'lensbody'},
+      h('div',{class:'lenscap'}, h('b',{text:state.lens}), ' — '+L.accent+'. Same event '+t.id+', rendered through this desk’s lens. ', h('i',{text:'Nothing copied; one truth, many views.'})),
+      h('div',{class:'kv'}, cells)));
+}
+function geLine(){ const parts=[]; for(let i=0;i<arguments.length;i++)parts.push(arguments[i]); return h('div',{class:'line'},parts); }
+function K(s){return h('span',{class:'key',text:s});}
+function S(s){return h('span',{class:'str',text:s});}
+function N(s){return h('span',{class:'num',text:String(s)});}
+function P(s){return h('span',{class:'pun',text:s});}
+function C(s){return h('span',{class:'cm',text:s});}
+function geBox(t){
+  return h('div',{class:'ge'},
+    geLine(P('{')),
+    geLine('  ',K('"eventId"'),P(': '),S('"'+t.id+'"'),P(',')),
+    geLine('  ',K('"eventType"'),P(': '),S('"TradeExecuted"'),P(',')),
+    geLine('  ',K('"businessTime"'),P(': '),S('"2026-09-14T'+t.lifecycle[0][2]+'-04:00"'),P(',')),
+    geLine('  ',K('"recordTime"'),P(': '),S('"2026-09-14T14:18:01-04:00"'),P(',  '),C('// bitemporal')),
+    geLine('  ',K('"legalEntity"'),P(': '),S('"LEI:5493001MANERA00TECH"'),P(',')),
+    geLine('  ',K('"counterparty"'),P(': { '),K('"id"'),P(':'),S('"LEI:'+t.lei+'"'),P(', '),K('"name"'),P(':'),S('"'+t.cpty+'"'),P(' },')),
+    geLine('  ',K('"account"'),P(': '),S('"'+t.acct+'"'),P(',')),
+    geLine('  ',K('"product"'),P(': { '),K('"venue"'),P(':'),S('"'+t.venue+'"'),P(', '),K('"cfi"'),P(':'),S('"'+t.cfi+'"'),P(', '),K('"name"'),P(':'),S('"'+t.inst+'"'),P(' },')),
+    geLine('  ',K('"economics"'),P(': { '),K('"side"'),P(':'),S('"'+t.side+'"'),P(', '),K('"qty"'),P(':'),N(t.qty),P(', '),K('"price"'),P(':'),N(t.price),P(', '),K('"ccy"'),P(':'),S('"'+t.ccy+'"'),P(' },')),
+    geLine('  ',K('"clearing"'),P(': { '),K('"ccp"'),P(':'),S('"'+t.ccp+'"'),P(', '),K('"uti"'),P(':'),S('"'+t.uti+'"'),P(' },')),
+    geLine('  ',K('"obligations"'),P(': ['),S('"'+t.oblig.join('", "')+'"'),P('],')),
+    geLine('  ',K('"integrity"'),P(': { '),K('"hash"'),P(':'),S('"sha256:9f2c…"'),P(', '),K('"validated"'),P(':'),N(t.status!=='break'),P(' }')),
+    geLine(P('}')));
+}
+function resolve(id){
+  const t=TRADES.find(x=>x.id===id);
+  t.status='healthy';t.prob=2;t.ai=null;
+  t.lifecycle=t.lifecycle.map(s=>[s[0],'done',s[2]==='—'?'14:18:30':s[2]]);
+  t.sim=t.sim.map(s=>[s[0],'ok']);
+  renderBlotter();renderDetail();
+  toast('Fix applied on the golden event — propagated to clearing, booking & the CIRO / NI 96-101 obligation.');
+}
+let toastTimer;
+function toast(msg){
+  let el=document.getElementById('toast');
+  if(el)el.remove();
+  el=h('div',{class:'toast',id:'toast',text:'✓ '+msg});
+  document.body.append(el);
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),420);},3400);
+}
+
+// ---- Assistant ----
+const QA=[
+ {q:'Which trades will break today?',a:()=>{const b=TRADES.filter(t=>t.status==='break'),w=TRADES.filter(t=>t.status==='warning');
+   return {nodes:rich('**'+b.length+' trades** are predicted to break before their cut-offs, plus '+w.length+' at-risk. FIOS flagged each at point-of-capture — all are fixable upstream before they propagate:'),
+     refs:b.map(t=>[t.id,t.inst+' — '+t.ai.head.replace(/^\d+% break probability — /,'')])};}},
+ {q:'Why will SXF Sep-26 (EVT-SXF-100482) break?',a:()=>{const t=TRADES.find(x=>x.id==='EVT-SXF-100482');
+   if(t&&t.ai)return {nodes:[h('b',{text:t.ai.head+'.'}),h('br'),h('br'),...rich(t.ai.cause),h('br'),h('br'),h('span',{class:'fix',text:'Fix: '}),...rich(t.ai.fix)],refs:[[t.id,'Open trade']]};
+   return {nodes:[document.createTextNode('That trade is now clean — the fix was applied to the golden event.')],refs:[]};}},
+ {q:'What is today’s expected reconciliation workload?',a:()=>({nodes:rich('**Near-zero internal reconciliation.** Every internal consumer derives from one golden event, so there is nothing to reconcile between desks. The remaining work is **external**: '+TRADES.filter(t=>t.status==='break').length+' items to confirm against CDCC / custodian records before cut-off — reduced to a single clean-source check rather than matching diverged copies.'),refs:[]})},
+ {q:'Show the give-up exceptions.',a:()=>{const g=TRADES.filter(t=>t.acct.indexOf('GIVE-UP')>-1&&t.status!=='healthy');
+   return {nodes:rich(g.length+' give-up / take-up exception(s) open. Give-ups route to the carrying broker; an unresolved give-up account sends the position to the executing broker’s buffer at the 15:30 CDCC cut-off:'),
+     refs:g.map(t=>[t.id,t.inst+' — '+gu(t)])};}},
+];
+let chat=[];
+function openAssistant(){
+  document.getElementById('assistant').classList.add('on');document.getElementById('overlay').classList.add('on');
+  if(!chat.length){pushA({nodes:[document.createTextNode('I’m the FIOS Operations Assistant. I reason over the live golden-event store — ask me anything about today’s flow. Try one of these:')],refs:[]});renderSugg();}
+}
+function closeAssistant(){document.getElementById('assistant').classList.remove('on');document.getElementById('overlay').classList.remove('on');}
+function renderSugg(){mount('sugg',h('div',{},QA.map((x,i)=>h('div',{class:'s',text:x.q,onclick:()=>ask(i)}))));}
+function pushU(t){chat.push({r:'u',t});renderChat();}
+function pushA(o){chat.push({r:'a',o});renderChat();}
+function renderChat(){
+  mount('achat', h('div',{style:'display:flex;flex-direction:column;gap:14px'}, chat.map(msg=>{
+    if(msg.r==='u')return h('div',{class:'msg u',text:msg.t});
+    const refs=(msg.o.refs||[]).map(r=>h('div',{class:'rr',onclick:()=>{select(r[0]);closeAssistant();}}, '↗ ', h('b',{text:r[0]}), ' · '+r[1]));
+    return h('div',{class:'msg a'}, h('div',{class:'av',text:'✦ FIOS AI'}),
+      h('div',{class:'bubble'}, msg.o.nodes, refs.length?h('div',{class:'resref'},refs):null));
+  })));
+  const c=document.getElementById('achat');c.scrollTop=c.scrollHeight;
+}
+function ask(i){pushU(QA[i].q);setTimeout(()=>pushA(QA[i].a()),260);}
+function sendAsk(){
+  const el=document.getElementById('ainput');const v=el.value.trim();if(!v)return;el.value='';
+  pushU(v);const low=v.toLowerCase();let hit=null;
+  if(low.indexOf('sxf')>-1||low.indexOf('100482')>-1)hit=QA[1];
+  else if(low.indexOf('recon')>-1||low.indexOf('workload')>-1)hit=QA[2];
+  else if(low.indexOf('give')>-1||low.indexOf('take-up')>-1)hit=QA[3];
+  else if(low.indexOf('break')>-1||low.indexOf('today')>-1||low.indexOf('fail')>-1)hit=QA[0];
+  setTimeout(()=>{ if(hit)pushA(hit.a()); else pushA({nodes:[document.createTextNode('In this prototype I answer over the synthetic listed-derivatives book. Try: which trades will break today · why will SXF Sep-26 break · today’s reconciliation workload · the give-up exceptions.')],refs:[]});},260);
+}
+
+document.getElementById('askbtn').addEventListener('click',openAssistant);
+document.getElementById('aclose').addEventListener('click',closeAssistant);
+document.getElementById('overlay').addEventListener('click',closeAssistant);
+document.getElementById('asend').addEventListener('click',sendAsk);
+document.getElementById('ainput').addEventListener('keydown',e=>{if(e.key==='Enter')sendAsk();});
+
+let sec=2;
+setInterval(()=>{sec=(sec+1)%3600;const mm=18+Math.floor(sec/60),ss=sec%60;document.getElementById('clock').textContent='14:'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0')+' ET';},1000);
+
+renderFilters();renderBlotter();renderDetail();
+</script>
+</body>
+</html>

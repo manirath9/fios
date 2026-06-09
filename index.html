@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIOS — Financial Infrastructure Operating System</title>
+<meta name="description" content="FIOS is the golden financial truth layer that sits above a financial institution's existing systems — capture once, validate once, transform many, report everywhere. A Manera Technologies venture.">
+<style>
+  :root{
+    --bg:#08080a; --bg2:#0c0c11; --surface:#121218; --surface2:#1a1a22;
+    --border:#23232d; --border2:#34343f;
+    --gold:#e8c97d; --gold-dim:#b9974f; --cyan:#6ad7e6; --green:#54e09b;
+    --text:#edecf1; --muted:#9c9caa; --faint:#6a6a78;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    --max:1140px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 26px}
+  .glow{position:absolute;border-radius:50%;filter:blur(120px);opacity:.5;pointer-events:none;z-index:0}
+
+  /* nav */
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;backdrop-filter:blur(14px);background:rgba(8,8,10,.72);border-bottom:1px solid transparent;transition:.25s}
+  nav.scrolled{border-bottom-color:var(--border);background:rgba(8,8,10,.9)}
+  .navin{display:flex;align-items:center;gap:14px;height:64px;max-width:var(--max);margin:0 auto;padding:0 26px}
+  .logo{display:flex;align-items:center;gap:11px;font-weight:700;font-size:16px;letter-spacing:.3px}
+  .logo .seed{width:30px;height:30px}
+  .logo .tm{font-size:8px;color:var(--gold);vertical-align:super}
+  .navlinks{margin-left:auto;display:flex;align-items:center;gap:30px}
+  .navlinks a{font-size:13.5px;color:var(--muted);transition:.15s}
+  .navlinks a:hover{color:var(--text)}
+  .navcta{font-size:13px;font-weight:600;color:#0b0b0e;background:linear-gradient(180deg,var(--gold),var(--gold-dim));padding:9px 16px;border-radius:8px;transition:.15s}
+  .navcta:hover{filter:brightness(1.08)}
+  .burger{display:none;margin-left:auto;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer}
+
+  /* hero */
+  .hero{position:relative;padding:150px 0 90px;text-align:center;overflow:hidden}
+  .hero .glow{width:680px;height:680px;background:radial-gradient(circle,rgba(232,201,125,.16),transparent 60%);top:-220px;left:50%;transform:translateX(-50%)}
+  .hero .flower-bg{position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:520px;height:520px;opacity:.10;z-index:0;animation:spin 90s linear infinite}
+  @keyframes spin{to{transform:translateX(-50%) rotate(360deg)}}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);padding:6px 15px;border:1px solid var(--gold-dim);border-radius:30px;background:rgba(232,201,125,.05);position:relative;z-index:2;margin-bottom:28px}
+  h1{position:relative;z-index:2;font-size:clamp(38px,6vw,72px);font-weight:800;line-height:1.04;letter-spacing:-1.5px;background:linear-gradient(180deg,#fff 30%,#cfcdd8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero p.lede{position:relative;z-index:2;max-width:660px;margin:26px auto 0;font-size:18.5px;color:var(--muted);line-height:1.65}
+  .hero p.lede b{color:var(--text);font-weight:600}
+  .cta-row{position:relative;z-index:2;display:flex;gap:14px;justify-content:center;margin-top:38px;flex-wrap:wrap}
+  .btn{font-size:15px;font-weight:600;padding:13px 24px;border-radius:10px;cursor:pointer;transition:.15s;border:1px solid var(--border2);display:inline-flex;align-items:center;gap:9px}
+  .btn.gold{background:linear-gradient(180deg,var(--gold),var(--gold-dim));color:#0b0b0e;border:none}
+  .btn.gold:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn.ghost{background:var(--surface);color:var(--text)}
+  .btn.ghost:hover{border-color:var(--border2);background:var(--surface2)}
+  .hero .tagline{position:relative;z-index:2;margin-top:34px;font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .hero .tagline .dot{color:var(--gold)}
+
+  /* sections */
+  section.band{padding:96px 0;position:relative}
+  .seclabel{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+  h2{font-size:clamp(28px,3.6vw,42px);font-weight:750;letter-spacing:-.8px;line-height:1.12}
+  .sub{font-size:17px;color:var(--muted);max-width:640px;margin-top:18px;line-height:1.65}
+  .reveal{opacity:0;transform:translateY(22px);transition:.7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  .grid{display:grid;gap:18px;margin-top:46px}
+  .g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  .card{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--border);border-radius:16px;padding:26px;transition:.2s}
+  .card:hover{border-color:var(--border2);transform:translateY(-3px)}
+  .card .ico{width:42px;height:42px;border-radius:11px;background:rgba(232,201,125,.09);border:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
+  .card h3{font-size:17px;font-weight:650;margin-bottom:8px}
+  .card p{font-size:14px;color:var(--muted);line-height:1.6}
+
+  /* inversion band */
+  .invert{background:linear-gradient(180deg,#0a0a0f,#0c0c12);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:40px}
+  .flowchip{font-family:var(--mono);font-size:13px;padding:11px 16px;border-radius:10px;background:var(--surface);border:1px solid var(--border2)}
+  .flowchip.seed{border-color:var(--gold);color:var(--gold);background:rgba(232,201,125,.06)}
+  .flowarrow{color:var(--faint)}
+  .pulls{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-top:14px;max-width:760px;margin-left:auto;margin-right:auto}
+  .pull{font-size:12px;color:var(--muted);font-family:var(--mono);padding:7px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--border)}
+  .keyline{margin-top:44px;max-width:760px;font-size:18px;line-height:1.6;color:var(--text)}
+  .keyline b{color:var(--gold)}
+
+  /* positioning */
+  .pos{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:46px}
+  .poscard{text-align:center;padding:30px 22px;border:1px solid var(--border);border-radius:16px;background:var(--surface)}
+  .poscard.me{border-color:var(--gold-dim);background:linear-gradient(180deg,rgba(232,201,125,.06),var(--surface))}
+  .poscard .nm{font-size:22px;font-weight:750;margin-bottom:6px}
+  .poscard.me .nm{color:var(--gold)}
+  .poscard .ds{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+
+  /* approach */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:46px}
+  .step{padding:26px;border:1px solid var(--border);border-radius:16px;background:var(--surface);position:relative}
+  .step .ph{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:12px}
+  .step h3{font-size:18px;font-weight:650;margin-bottom:8px}
+  .step p{font-size:14px;color:var(--muted)}
+  .discipline{margin-top:34px;display:flex;gap:26px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+  .discipline b{color:var(--text)}
+
+  /* cta */
+  .ctaband{position:relative;text-align:center;padding:100px 0;overflow:hidden}
+  .ctaband .glow{width:560px;height:560px;background:radial-gradient(circle,rgba(106,215,230,.12),transparent 60%);bottom:-260px;left:50%;transform:translateX(-50%)}
+  .form{max-width:520px;margin:36px auto 0;position:relative;z-index:2}
+  .form .fields{display:grid;gap:12px}
+  .form input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;color:var(--text);font-size:15px;font-family:var(--sans)}
+  .form input:focus{outline:none;border-color:var(--gold-dim)}
+  .form .btn{width:100%;justify-content:center;margin-top:4px}
+  .thanks{display:none;padding:30px;border:1px solid var(--green);border-radius:14px;background:rgba(84,224,155,.06);color:#bff5d8;font-size:15px}
+  .form.sent .fields{display:none} .form.sent .thanks{display:block}
+  .privacy{font-size:12px;color:var(--faint);margin-top:14px}
+
+  footer{border-top:1px solid var(--border);padding:40px 0;background:var(--bg2)}
+  .foot{display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--faint)}
+  .foot .logo{font-size:14px;color:var(--muted)}
+  .foot .r{margin-left:auto;display:flex;gap:22px}
+  .foot .r a:hover{color:var(--muted)}
+  .foot .legal{width:100%;font-size:11.5px;color:var(--faint);margin-top:10px;line-height:1.5}
+
+  @media(max-width:880px){
+    .navlinks{display:none} .burger{display:block}
+    .navlinks.open{display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;gap:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 0}
+    .navlinks.open a{padding:13px 26px;width:100%} .navlinks.open .navcta{margin:8px 26px;text-align:center}
+    .g4,.g3,.pos,.steps{grid-template-columns:1fr} .g2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav"><div class="navin">
+  <a class="logo" href="#top">
+    <svg class="seed" viewBox="0 0 100 100" fill="none" stroke="#e8c97d" stroke-width="1.5"><circle cx="50" cy="50" r="15"/><circle cx="50" cy="35" r="15"/><circle cx="50" cy="65" r="15"/><circle cx="37" cy="42.5" r="15"/><circle cx="63" cy="42.5" r="15"/><circle cx="37" cy="57.5" r="15"/><circle cx="63" cy="57.5" r="15"/></svg>
+    FIOS<span class="tm">™</span>
+  </a>
+  <button class="burger" id="burger">≡</button>
+  <div class="navlinks" id="navlinks">
+    <a href="#problem">The Problem</a>
+    <a href="#shift">The Shift</a>
+    <a href="#capabilities">What It Is</a>
+    <a href="#approach">Approach</a>
+    <a class="navcta" href="#briefing">Request a briefing</a>
+  </div>
+</div></nav>
+
+<div id="top"></div>
+<header class="hero">
+  <svg class="flower-bg" viewBox="0 0 100 100" fill="none" stroke="#e8c97d" stroke-width="0.5">
+    <circle cx="50" cy="50" r="15"/><circle cx="50" cy="35" r="15"/><circle cx="50" cy="65" r="15"/><circle cx="37" cy="42.5" r="15"/><circle cx="63" cy="42.5" r="15"/><circle cx="37" cy="57.5" r="15"/><circle cx="63" cy="57.5" r="15"/>
+    <circle cx="24" cy="50" r="15"/><circle cx="76" cy="50" r="15"/><circle cx="37" cy="27.5" r="15"/><circle cx="63" cy="27.5" r="15"/><circle cx="37" cy="72.5" r="15"/><circle cx="63" cy="72.5" r="15"/><circle cx="24" cy="35" r="15"/><circle cx="76" cy="35" r="15"/><circle cx="24" cy="65" r="15"/><circle cx="76" cy="65" r="15"/><circle cx="50" cy="20" r="15"/><circle cx="50" cy="80" r="15"/>
+  </svg>
+  <div class="glow"></div>
+  <div class="wrap">
+    <span class="eyebrow">Financial Infrastructure Operating System</span>
+    <h1>One financial truth.<br>Infinite outputs.</h1>
+    <p class="lede"><b>FIOS</b> is the golden truth layer that sits above a financial institution's existing systems — capturing every financial event once, validating it once, and generating every downstream output from a <b>single validated source</b>. Front to back. By design.</p>
+    <div class="cta-row">
+      <a class="btn gold" href="#briefing">Request a briefing</a>
+      <a class="btn ghost" href="demo/index.html" target="_blank">See the prototype →</a>
+    </div>
+    <div class="tagline">A Manera Technologies venture <span class="dot">·</span> Now inviting pilot partners</div>
+  </div>
+</header>
+
+<section class="band" id="problem">
+  <div class="wrap reveal">
+    <div class="seclabel">The Problem</div>
+    <h2>The industry runs on copies of the truth.</h2>
+    <p class="sub">The same trade is captured eight, ten, fifteen times — in different systems, in different dialects, governed by different teams. The copies drift apart. Then people reconcile them back together. Reconciliation isn't a workflow problem; it's a structural condition of how finance stores truth.</p>
+    <div class="grid g4">
+      <div class="card"><div class="ico">⧉</div><h3>Duplicate data</h3><p>One economic event, recorded over and over across siloed platforms.</p></div>
+      <div class="card"><div class="ico">⚖</div><h3>Multiple truths</h3><p>Front, middle, and back office disagree on position, risk, and P&amp;L.</p></div>
+      <div class="card"><div class="ico">↻</div><h3>Reconciliation overhead</h3><p>Teams and tools whose entire job is arguing copies back into agreement.</p></div>
+      <div class="card"><div class="ico">⚠</div><h3>Reactive reporting</h3><p>Regulatory output assembled after the fact — brittle, manual, error-prone.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band invert" id="shift">
+  <div class="wrap reveal">
+    <div class="seclabel">The Shift</div>
+    <h2>Stop fixing breaks downstream.<br>Prevent them upstream.</h2>
+    <p class="sub">FIOS stores only the validated <b>Financial Event</b> and the reference entities it touches. Everything else — position, ledger, risk, settlement instruction, every regulatory report — is <i>derived</i> from it, on demand, never copied.</p>
+    <div class="flow">
+      <div class="flowchip seed">One validated Financial Event</div>
+      <span class="flowarrow">→</span>
+      <div class="flowchip">Projections</div>
+    </div>
+    <div class="pulls">
+      <div class="pull">Trade view</div><div class="pull">Accounting</div><div class="pull">Risk</div><div class="pull">Settlement</div><div class="pull">Compliance</div><div class="pull">Client statement</div><div class="pull">Regulatory report</div>
+    </div>
+    <div class="keyline">Because there is only one source, <b>internal reconciliation disappears</b> — there is nothing to reconcile between your own systems. External reconciliation to CCPs and custodians is <b>reduced</b> to a single clean-source check, rather than matching diverged copies.</div>
+  </div>
+</section>
+
+<section class="band" id="capabilities">
+  <div class="wrap reveal">
+    <div class="seclabel">What It Is</div>
+    <h2>An operating system, not another application.</h2>
+    <p class="sub">FIOS connects as a non-invasive layer above the systems you already run — Murex, Broadridge, Calypso/Adenza, SAP, Oracle, and your legacy estate. It replaces nothing. It changes where the truth comes from.</p>
+    <div class="grid g4">
+      <div class="card"><div class="ico">◈</div><h3>Golden event store</h3><p>One canonical, validated, time-aware record of every financial event — across asset classes.</p></div>
+      <div class="card"><div class="ico">✓</div><h3>Validate, then propagate</h3><p>Events are checked at the boundary before they ever reach a downstream system.</p></div>
+      <div class="card"><div class="ico">✦</div><h3>AI that reasons</h3><p>Explains exceptions in plain language and predicts breaks before they occur.</p></div>
+      <div class="card"><div class="ico">⇄</div><h3>Universal outputs</h3><p>One event feeds accounting, risk, settlement, compliance, and every regulator — automatically.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band invert" id="flagship">
+  <div class="wrap reveal">
+    <div class="seclabel">See It Work</div>
+    <h2>The truth, made tangible.</h2>
+    <p class="sub">A trade isn't a row in a database. In FIOS it's a living object that knows its own downstream journey.</p>
+    <div class="grid g3">
+      <div class="card"><div class="ico">◎</div><h3>Digital twin &amp; break prevention</h3><p>FIOS simulates a trade's full downstream path at point-of-capture — and surfaces the break <i>before</i> it reaches clearing.</p></div>
+      <div class="card"><div class="ico">▦</div><h3>Single pane of glass</h3><p>One trade, one truth. The full lifecycle and every desk's view — front to finance — on one screen.</p></div>
+      <div class="card"><div class="ico">✦</div><h3>Ask FIOS</h3><p>An AI operations assistant that reasons over the live golden-event store. "Which trades will break today?" — answered.</p></div>
+    </div>
+    <div class="cta-row" style="justify-content:flex-start;margin-top:36px">
+      <a class="btn gold" href="demo/index.html" target="_blank">Explore the interactive prototype →</a>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="positioning">
+  <div class="wrap reveal">
+    <div class="seclabel">The Category</div>
+    <h2>Every era of finance produces one indispensable layer.</h2>
+    <p class="sub">Bloomberg became the truth layer for market data. SWIFT for messaging between institutions. FIOS is the truth layer for the events <i>inside</i> an institution — and it becomes a standard the way standards actually spread: institutions map to it because it is easier than not.</p>
+    <div class="pos">
+      <div class="poscard"><div class="nm">Bloomberg</div><div class="ds">Market data</div></div>
+      <div class="poscard"><div class="nm">SWIFT</div><div class="ds">Messaging</div></div>
+      <div class="poscard me"><div class="nm">FIOS™</div><div class="ds">Internal financial truth</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="band invert" id="approach">
+  <div class="wrap reveal">
+    <div class="seclabel">The Approach</div>
+    <h2>Pilot small. Architecture unlimited.</h2>
+    <p class="sub">FIOS is designed for the final destination from day one — but proven one focused, fundable problem at a time. Every phase solves a real problem and funds the next.</p>
+    <div class="steps">
+      <div class="step"><div class="ph">Phase 1 · Discovery</div><h3>Prove it on your own data</h3><p>A focused research engagement on anonymized data: map where truth fractures, quantify the cost, design the future state.</p></div>
+      <div class="step"><div class="ph">Phase 2 · Proof of Concept</div><h3>Build the core, on-premises</h3><p>Stand up the FIOS golden-event layer for one product line — break prevention, validation, golden truth — in your environment.</p></div>
+      <div class="step"><div class="ph">Phase 3 · Scale</div><h3>Expand across the enterprise</h3><p>One proven foundation extends across asset classes and divisions, compounding in value with every event.</p></div>
+    </div>
+    <div class="discipline">
+      <span>🔒 <b>On-premises by design</b> — your data never leaves your environment.</span>
+      <span>📐 <b>First-principles architecture</b> — built to span the institution.</span>
+      <span>📊 <b>Evidence over hype</b> — claims are validated, not promised.</span>
+    </div>
+  </div>
+</section>
+
+<section class="ctaband" id="briefing">
+  <div class="glow"></div>
+  <div class="wrap reveal">
+    <div class="seclabel" style="text-align:center">Get Started</div>
+    <h2 style="text-align:center">Ready to see the truth layer?</h2>
+    <p class="sub" style="margin-left:auto;margin-right:auto;text-align:center">FIOS is inviting a select group of institutions to a confidential briefing and pilot discussion. Tell us where you are and we'll be in touch.</p>
+    <form class="form" id="form">
+      <div class="fields">
+        <input type="text" id="f-name" placeholder="Name" required>
+        <input type="text" id="f-org" placeholder="Institution" required>
+        <input type="email" id="f-email" placeholder="Work email" required>
+        <button type="submit" class="btn gold">Request a briefing</button>
+      </div>
+      <div class="thanks">✓ Thank you — your request has been noted. A member of the FIOS team will reach out to arrange a confidential briefing.</div>
+    </form>
+    <div class="privacy">Confidential. Submitted in confidence to Manera Technologies Inc. No production data is ever requested.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <a class="logo" href="#top"><svg class="seed" viewBox="0 0 100 100" fill="none" stroke="#9c9caa" stroke-width="1.5" style="width:24px;height:24px"><circle cx="50" cy="50" r="15"/><circle cx="50" cy="35" r="15"/><circle cx="50" cy="65" r="15"/><circle cx="37" cy="42.5" r="15"/><circle cx="63" cy="42.5" r="15"/><circle cx="37" cy="57.5" r="15"/><circle cx="63" cy="57.5" r="15"/></svg> FIOS</a>
+      <span>· Financial Infrastructure Operating System</span>
+      <div class="r"><a href="#problem">Problem</a><a href="#approach">Approach</a><a href="#briefing">Briefing</a></div>
+      <div class="legal">© 2026 Manera Technologies Inc. · Confidential. FIOS and Financial Infrastructure Operating System are marks of Manera Technologies Inc. FIOS Holdings Inc. to be formed. This site describes a venture in development and does not constitute an offer of securities or services.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+"use strict";
+var nav=document.getElementById('nav');
+window.addEventListener('scroll',function(){ nav.classList.toggle('scrolled', window.scrollY>10); });
+document.getElementById('burger').addEventListener('click',function(){ document.getElementById('navlinks').classList.toggle('open'); });
+document.querySelectorAll('#navlinks a').forEach(function(a){ a.addEventListener('click',function(){ document.getElementById('navlinks').classList.remove('open'); }); });
+document.getElementById('form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var f=document.getElementById('form');
+  var data={name:document.getElementById('f-name').value,institution:document.getElementById('f-org').value,email:document.getElementById('f-email').value,_subject:'FIOS — briefing request',_cc:'contact@maneratech.com',_template:'table'};
+  f.classList.add('sent');
+  fetch('https://formsubmit.co/ajax/kao@maneratech.com',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(data)}).catch(function(){});
+});
+var io=new IntersectionObserver(function(entries){ entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } }); },{threshold:.12});
+document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+</script>
+</body>
+</html>
