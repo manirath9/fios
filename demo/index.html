@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FIOS — Operations Console (Concept Prototype)</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='42' r='26' fill='none' stroke='%23e8c97d' stroke-width='5'/><circle cx='38' cy='60' r='26' fill='none' stroke='%23e8c97d' stroke-width='5'/><circle cx='62' cy='60' r='26' fill='none' stroke='%23e8c97d' stroke-width='5'/></svg>">
 <style>
   :root{
     --bg:#0a0a0c; --bg2:#0c0c11; --surface:#121218; --surface2:#1a1a22; --surface3:#22222c;
@@ -77,7 +78,7 @@
   .dhead .meta{font-size:12px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
   .dhead .right-tag{margin-left:auto;text-align:right}
   .prob{font-size:30px;font-weight:800;line-height:1;font-family:var(--mono)}
-  .prob.s-break{color:var(--red)} .prob.s-warning{color:var(--amber)} .prob.s-healthy{color:var(--green)}
+  .prob.s-break{color:var(--red);background:transparent} .prob.s-warning{color:var(--amber);background:transparent} .prob.s-healthy{color:var(--green);background:transparent}
   .prob-l{font-size:10px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-top:4px}
 
   .sec{padding:22px 26px;border-bottom:1px solid var(--border)}
@@ -194,6 +195,61 @@
   .ain button{background:var(--gold);border:none;border-radius:8px;width:40px;cursor:pointer;color:#0c0c11;font-size:16px}
 
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f1a13;border:1px solid var(--green);color:#bff5d8;padding:12px 18px;border-radius:9px;font-size:13px;z-index:50;max-width:560px;box-shadow:0 8px 30px rgba(0,0,0,.5);transition:opacity .4s}
+  .avmini{margin-left:6px;font-size:9px;font-weight:700;color:var(--gold);background:var(--surface3);border:1px solid var(--border2);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center}
+  .asgline{margin-top:8px;font-size:11px;color:var(--green);font-family:var(--mono)}
+
+  /* Team & accountability view */
+  .teamwrap{overflow-y:auto;flex:1;padding:26px 30px 60px}
+  .torg{display:flex;flex-direction:column;gap:0;align-items:center;margin:6px 0 10px}
+  .trow2{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .tconn{width:2px;height:16px;background:var(--border2)}
+  .person{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 15px;width:236px;cursor:pointer;transition:.12s;text-align:left}
+  .person:hover{border-color:var(--gold-dim)}
+  .person .nm{font-weight:650;font-size:13.5px;display:flex;align-items:center;gap:8px}
+  .person .rl{font-size:11px;color:var(--cyan);margin-top:2px}
+  .person .rs{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.45}
+  .person .ln{font-size:10px;color:var(--faint);font-family:var(--mono);margin-top:5px;display:flex;justify-content:space-between}
+  .person .oi{color:var(--amber)}
+  .pres{width:7px;height:7px;border-radius:50%;flex:0 0 7px}
+  .pres.online{background:var(--green)} .pres.away{background:var(--amber)}
+  .av2{width:22px;height:22px;border-radius:50%;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:var(--gold);flex:0 0 22px}
+
+  /* Chat drawer */
+  .chtabs{display:flex;gap:5px;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .chtab{font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:6px 10px;border-radius:7px;cursor:pointer;transition:.12s}
+  .chtab:hover{border-color:var(--border2)}
+  .chtab.on{color:var(--text);background:var(--surface3);border-color:var(--border2)}
+  .chtab.ext{border-color:rgba(232,201,125,.45);color:var(--gold)}
+  .chtab.ext.on{background:rgba(232,201,125,.1);color:var(--gold)}
+  .cmsg{display:flex;flex-direction:column;gap:4px;max-width:94%}
+  .cmsg.out{align-self:flex-end}
+  .cmsg.sys{align-self:center;font-size:11px;color:var(--faint);text-align:center;background:var(--surface);border:1px dashed var(--border2);border-radius:9px;padding:8px 12px;line-height:1.5;max-width:100%}
+  .cwho{display:flex;align-items:center;gap:7px}
+  .cname{font-size:11px;font-weight:650} .cname.ext{color:var(--gold)}
+  .ctag{font-size:8.5px;font-weight:700;letter-spacing:.5px;color:#1a1408;background:var(--amber);padding:1px 6px;border-radius:4px}
+  .ctime{font-size:9.5px;color:var(--faint);font-family:var(--mono);margin-left:auto}
+  .cbody{background:var(--surface);border:1px solid var(--border);border-radius:4px 11px 11px 11px;padding:9px 12px;font-size:12.5px;line-height:1.55}
+  .cbody .resref{margin-top:8px;display:flex;flex-direction:column;gap:5px}
+  .cbody .rr{font-size:11.5px;font-family:var(--mono);color:var(--muted);padding:6px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;display:flex;gap:8px;align-items:center}
+  .cbody .rr:hover{border-color:var(--border2)} .cbody .rr b{color:var(--cyan)}
+  .cmsg.out .cbody{background:var(--surface3);border-color:var(--border2);border-radius:11px 4px 11px 11px}
+  .ccard{margin-top:9px;background:rgba(84,224,155,.05);border:1px solid rgba(84,224,155,.35);border-radius:9px;padding:11px 13px;text-align:left}
+  .ccard .ct{font-size:9px;font-weight:800;letter-spacing:1px;color:var(--green)}
+  .ccard .cr{font-size:12px;font-family:var(--mono);margin-top:5px;color:var(--text)}
+  .capplied{font-size:11.5px;color:var(--green);margin-top:8px;font-weight:600}
+
+  /* Assign modal */
+  .amodal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:30}
+  .amodal.on{display:flex}
+  .abox{width:470px;max-width:92vw;max-height:80vh;overflow-y:auto;background:#101016;border:1px solid var(--border2);border-radius:14px;padding:20px 22px;box-shadow:0 18px 60px rgba(0,0,0,.6)}
+  .abox h4{font-size:14px;font-weight:700;margin-bottom:4px}
+  .abox .asub{font-size:11.5px;color:var(--muted);margin-bottom:14px}
+  .acand{display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:7px;transition:.12s}
+  .acand:hover{border-color:var(--gold-dim)}
+  .acand.best{border-color:rgba(232,201,125,.5);background:rgba(232,201,125,.05)}
+  .acand .why{font-size:10px;color:var(--gold);margin-top:2px}
+  .albl{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:12px 0 8px}
+
   @media(max-width:980px){.app{grid-template-columns:1fr}.left{display:none}.roles{display:none}}
 </style>
 </head>
@@ -215,6 +271,7 @@
   <div class="proto">
     <span class="clock" id="clock">14:18:02 ET</span>
     <span class="warn">CONCEPT PROTOTYPE · SYNTHETIC DATA</span>
+    <button class="askbtn" id="chatbtn" style="background:var(--surface3);color:var(--text);border:1px solid var(--border2)">💬 Chat</button>
     <button class="askbtn" id="askbtn">✦ Ask FIOS</button>
   </div>
 </header>
@@ -242,6 +299,19 @@
   <div class="ain"><input id="ainput" placeholder="Ask about today's operations…"><button id="asend">➤</button></div>
 </aside>
 
+<aside class="assistant" id="teamchat">
+  <div class="ahd">
+    <div><div class="tt">💬 Channels</div><div class="ss">Team · desk bridges · FIOS Link (cross-firm)</div></div>
+    <div class="x" id="tcclose">×</div>
+  </div>
+  <div class="chtabs" id="tchans"></div>
+  <div class="achat" id="tcbody"></div>
+  <div class="sugg" id="tcsugg"></div>
+  <div class="ain"><input id="tcinput" placeholder="Message…"><button id="tcsend">➤</button></div>
+</aside>
+
+<div class="amodal" id="assignmodal"><div id="assigninner"></div></div>
+
 <script>
 "use strict";
 function h(tag, props){
@@ -267,19 +337,19 @@ function rich(s){return s.split('**').map(function(p,i){return i%2?h('b',{text:p
 
 const TRADES=[
  {id:'EVT-SXF-100482',inst:'SXF Sep-26',desc:'S&P/TSX 60 Index Future · Montréal Exchange',side:'BUY',qty:250,price:1284.40,ccy:'CAD',
-  cpty:'Meridian Global Fund',lei:'5493001KJTIIGC8Y1R12',acct:'GIVE-UP 450',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100482',cfi:'FFIXSX',mult:200,
+  cpty:'Meridian Global Fund',lei:'549300MERIDIAN0FUND',acct:'GIVE-UP 450',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100482',cfi:'FFIXSX',mult:200,
   status:'break',prob:97,
-  lifecycle:[['Executed','done','14:02:11'],['Allocated','warning','14:05:33'],['Give-Up','fail','—'],['Cleared','pending','—'],['Booked','pending','—'],['Settled','pending','—']],
+  lifecycle:[['Executed','done','14:02:11'],['Allocated','warning','14:05:33'],['Give-Up','fail','—'],['Cleared','pending','—'],['Booked','pending','—'],['Instructed','pending','—']],
   ai:{head:'97% break probability — missing give-up account',ddl:'15:30 give-up cut-off',
     cause:'The trade is flagged for **give-up** to carrying broker BNS-CLEAR, but no give-up account / agreement is resolved on the golden event. CDCC will route the position to the executing broker’s **buffer account** at the 15:30 cut-off.',
     impact:'Position lands in the buffer account → a **front-vs-back position break** tomorrow AM → manual give-up correction + a CDCC adjustment. ~45 min investigation, plus reg-report amendment risk.',
     fix:'Resolve give-up account 450 (carrying broker BNS-CLEAR; **take-up** confirmed) on the golden event before 15:30. FIOS propagates it to clearing, booking and the CIRO / NI 96-101 obligation automatically — **one fix, every downstream output.**'},
   sim:[['Golden Event','ok'],['Validation','ok'],['Give-Up Resolve','bad'],['CDCC Clearing','bad'],['Sub-Ledger','bad'],['Reg Report','bad']],oblig:['CIRO Trade Reporting','NI 96-101']},
 
- {id:'EVT-BAX-100455',inst:'BAX Dec-26',desc:'3-Month CORRA Future · Montréal Exchange',side:'SELL',qty:500,price:97.12,ccy:'CAD',
+ {id:'EVT-CRA-100455',inst:'CRA Dec-26',desc:'3-Month CORRA Future · Montréal Exchange',side:'SELL',qty:500,price:97.12,ccy:'CAD',
   cpty:'Laurentian Rates Desk',lei:'549300ZK8N4FQ2L1XX',acct:'HOUSE-22',book:'FI-RATES-03',venue:'MX',ccp:'CDCC',uti:'CA549300…100455',cfi:'FFIXRS',mult:2500,
   status:'warning',prob:34,
-  lifecycle:[['Executed','done','13:48:02'],['Allocated','warning','13:52:40'],['Give-Up','done','13:53:11'],['Cleared','done','13:55:07'],['Booked','pending','—'],['Settled','pending','—']],
+  lifecycle:[['Executed','done','13:48:02'],['Allocated','warning','13:52:40'],['Confirmed','done','13:53:11'],['Cleared','done','13:55:07'],['Booked','pending','—'],['Instructed','pending','—']],
   ai:{head:'34% break probability — allocation quantity mismatch',ddl:'EOD booking',
     cause:'Allocation splits across two sub-accounts (300 / 180) total **480**, but the executed quantity is **500**. A 20-lot residual is unallocated on the golden event.',
     impact:'If unresolved, the 20-lot residual books to a **suspense account** → a sub-ledger break and a P&L mis-statement on the desk tonight.',
@@ -289,7 +359,7 @@ const TRADES=[
  {id:'EVT-OCX-100501',inst:'RY 145C Oct-26',desc:'Royal Bank Equity Call Option · Montréal Exchange',side:'BUY',qty:120,price:3.85,ccy:'CAD',
   cpty:'Northwater Capital',lei:'549300AB12CD34EF56GH',acct:'CLIENT-7781',book:'EQ-OPT-02',venue:'MX',ccp:'CDCC',uti:'CA549300…100501',cfi:'OCASPS',mult:100,
   status:'break',prob:91,
-  lifecycle:[['Executed','done','14:11:55'],['Allocated','done','14:12:20'],['Give-Up','done','14:12:48'],['Cleared','fail','—'],['Booked','pending','—'],['Settled','pending','—']],
+  lifecycle:[['Executed','done','14:11:55'],['Allocated','done','14:12:20'],['Confirmed','done','14:12:48'],['Cleared','done','14:13:30'],['Booked','fail','—'],['Instructed','pending','—']],
   ai:{head:'91% break probability — stale product reference data',ddl:'CDCC clearing window',
     cause:'The option series multiplier on the legacy booking feed is **stale (100)** versus the CDCC-effective contract adjustment from a recent **corporate action**. The golden event carries the corrected term; the booking feed does not.',
     impact:'Cleared notional and margin (**MERIS**) will mismatch CDCC by the multiplier delta → a margin-call dispute and a cleared-vs-booked break.',
@@ -297,21 +367,21 @@ const TRADES=[
   sim:[['Golden Event','ok'],['Validation','ok'],['Product Ref','bad'],['CDCC Margin','bad'],['Booking','bad'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
 
  {id:'EVT-SXF-100509',inst:'SXF Sep-26',desc:'S&P/TSX 60 Index Future · Montréal Exchange',side:'SELL',qty:80,price:1284.60,ccy:'CAD',
-  cpty:'Meridian Global Fund',lei:'5493001KJTIIGC8Y1R12',acct:'GIVE-UP 450',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100509',cfi:'FFIXSX',mult:200,
+  cpty:'Meridian Global Fund',lei:'549300MERIDIAN0FUND',acct:'GIVE-UP 450',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100509',cfi:'FFIXSX',mult:200,
   status:'healthy',prob:2,
-  lifecycle:[['Executed','done','14:14:01'],['Allocated','done','14:14:25'],['Give-Up','done','14:14:51'],['Cleared','done','14:16:33'],['Booked','done','14:16:40'],['Settled','done','14:17:02']],
+  lifecycle:[['Executed','done','14:14:01'],['Allocated','done','14:14:25'],['Give-Up','done','14:14:51'],['Cleared','done','14:16:33'],['Booked','done','14:16:40'],['Instructed','done','14:17:02']],
   ai:null,sim:[['Golden Event','ok'],['Validation','ok'],['Give-Up','ok'],['CDCC Clearing','ok'],['Sub-Ledger','ok'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
 
  {id:'EVT-CGB-100460',inst:'CGB Dec-26',desc:'10-Year Gov’t of Canada Bond Future · MX',side:'BUY',qty:300,price:122.45,ccy:'CAD',
   cpty:'Laurentian Rates Desk',lei:'549300ZK8N4FQ2L1XX',acct:'HOUSE-22',book:'FI-RATES-03',venue:'MX',ccp:'CDCC',uti:'CA549300…100460',cfi:'FFIXRS',mult:1000,
   status:'healthy',prob:4,
-  lifecycle:[['Executed','done','13:30:10'],['Allocated','done','13:31:00'],['Give-Up','done','13:31:22'],['Cleared','done','13:33:05'],['Booked','done','13:33:11'],['Settled','done','13:33:40']],
+  lifecycle:[['Executed','done','13:30:10'],['Allocated','done','13:31:00'],['Confirmed','done','13:31:22'],['Cleared','done','13:33:05'],['Booked','done','13:33:11'],['Instructed','done','13:33:40']],
   ai:null,sim:[['Golden Event','ok'],['Validation','ok'],['Clearing','ok'],['Sub-Ledger','ok'],['Settlement','ok'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
 
- {id:'EVT-SXM-100488',inst:'SXM Sep-26',desc:'Mini S&P/TSX 60 Index Future · MX',side:'BUY',qty:140,price:128.44,ccy:'CAD',
-  cpty:'Northwater Capital',lei:'549300AB12CD34EF56GH',acct:'CLIENT-7781',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100488',cfi:'FFIXSX',mult:20,
+ {id:'EVT-SXM-100488',inst:'SXM Sep-26',desc:'Mini S&P/TSX 60 Index Future · MX',side:'BUY',qty:140,price:1284.40,ccy:'CAD',
+  cpty:'Northwater Capital',lei:'549300AB12CD34EF56GH',acct:'CLIENT-7781',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100488',cfi:'FFIXSX',mult:50,
   status:'warning',prob:28,
-  lifecycle:[['Executed','done','14:06:44'],['Allocated','done','14:07:10'],['Give-Up','warning','14:08:01'],['Cleared','done','14:09:30'],['Booked','done','14:09:38'],['Settled','pending','—']],
+  lifecycle:[['Executed','done','14:06:44'],['Allocated','done','14:07:10'],['SSI Check','warning','14:08:01'],['Cleared','done','14:09:30'],['Booked','done','14:09:38'],['Instructed','pending','—']],
   ai:{head:'28% break probability — counterparty SSI not yet confirmed',ddl:'T+1 settlement',
     cause:'The standing settlement instruction (**SSI**) for client CLIENT-7781 is pending re-confirmation after a custodian change. The golden event flags the SSI as **provisional**.',
     impact:'Low-probability settlement delay at T+1 if the SSI is not confirmed; **no clearing impact**.',
@@ -321,7 +391,7 @@ const TRADES=[
 
 const LENSES={
  'Front Office':{accent:'execution & P&L',rows:function(t){return [['Side / Qty',t.side+' '+t.qty],['Price',t.price.toFixed(2)+' '+t.ccy],['Notional',fmtN(t)],['Live P&L',(t.status==='healthy'?'+':'')+pnl(t)+' '+t.ccy],['Net Position',(t.side==='BUY'?'+':'-')+t.qty+' lots'],['Desk',t.book]];}},
- 'Middle Office':{accent:'validation & allocation',rows:function(t){return [['Validation',t.status==='break'?'FAILED':'PASSED'],['Allocation',t.id.indexOf('BAX')>-1?'480 / 500 (−20)':t.status==='healthy'?'Fully allocated':'Confirmed'],['Give-Up / Take-Up',gu(t)],['Open Exceptions',t.status==='healthy'?'0':'1'],['Confirm Status',t.status==='healthy'?'Affirmed':'Pending'],['Control',t.status==='break'?'Held':'Released']];}},
+ 'Middle Office':{accent:'validation & allocation',rows:function(t){return [['Validation',t.status==='break'?'FAILED':'PASSED'],['Allocation',t.id.indexOf('CRA')>-1?(t.status==='healthy'?'500 / 500 ✓':'480 / 500 (−20)'):t.status==='healthy'?'Fully allocated':'Confirmed'],['Give-Up / Take-Up',gu(t)],['Open Exceptions',t.status==='healthy'?'0':'1'],['Confirm Status',t.status==='healthy'?'Affirmed':'Pending'],['Control',t.status==='break'?'Held':'Released']];}},
  'Back Office':{accent:'settlement & accounting',rows:function(t){return [['Settlement',t.status==='healthy'?'Instructed':'On hold'],['Value Date','T+1'],['Cash Movement',fmtN(t)+' '+t.ccy],['Accounting Entry',t.status==='break'?'Suspense':'Posted (proj.)'],['Custodian',t.acct.indexOf('CLIENT')>-1?'CDS / Custodian':'House'],['Sub-Ledger',t.status==='break'?'Break':'Reconciled (internal)']];}},
  'Risk':{accent:'exposure & margin',rows:function(t){return [['Exposure',fmtN(t)+' '+t.ccy],['Initial Margin (MERIS)',m(notional(t)*0.062)+' '+t.ccy],['Variation Margin',(t.status==='healthy'?'+':'')+m(notional(t)*0.003)+' '+t.ccy],['Δ Sensitivity',t.cfi[0]==='O'?'0.52 / contract':'1.00 (linear)'],['Limit Usage',(20+(t.qty%37))+'% of desk'],['Stress (−10%)','−'+m(notional(t)*0.1)+' '+t.ccy]];}},
  'Compliance':{accent:'obligations & surveillance',rows:function(t){return [['Reg Obligation','CIRO TR'],['Derivatives Data','NI 96-101'],['Report Status',t.status==='break'?'Blocked (pre-fix)':'Ready'],['Surveillance','No flag'],['Lineage','Golden event → report'],['Amendment Risk',t.status==='break'?'High':'None']];}},
@@ -334,9 +404,10 @@ function pnl(t){return (t.status==='healthy'?Math.round(notional(t)*0.004):-Math
 function gu(t){return t.acct.indexOf('GIVE-UP')>-1 ? (t.status==='break'?'Unresolved → buffer':'BNS-CLEAR (take-up ✓)') : 'N/A (house)';}
 function cutoff(t){return t.ai?t.ai.ddl:null;}
 
-const ROLES=[['ops','◧','Operations'],['trader','◴','Trader'],['overview','▤','Overview']];
+const ROLES=[['ops','◧','Operations'],['trader','◴','Trader'],['overview','▤','Overview'],['team','⚇','Team']];
 const TRADER_DESK='EQ-DERIV-01';
 let state={sel:TRADES[0].id,lens:'Front Office',filter:'all',role:'ops'};
+let resolvedBreaks=0, resolvedRisk=0;
 const SYM={done:'✓',warning:'!',fail:'✕',pending:'·'};
 
 function renderRoles(){
@@ -357,12 +428,14 @@ function renderFilters(){
       f[2]?h('span',{class:'dot '+f[2]}):null, f[1]);})));
 }
 function renderPQHead(){
-  var wb=TRADES.filter(function(t){return t.status==='break';}).length;
-  var ar=TRADES.filter(function(t){return t.status==='warning';}).length;
+  var base=state.role==='trader'?TRADES.filter(function(t){return t.book===TRADER_DESK;}):TRADES;
+  var wb=base.filter(function(t){return t.status==='break';}).length;
+  var ar=base.filter(function(t){return t.status==='warning';}).length;
   mount('pqhead', h('div',{class:'pqstat'}, h('b',{text:wb+' will break'}), ' · ', h('span',{class:'amb',text:ar+' at risk'}), ' · ', h('span',{class:'cy',text:'fix upstream before cut-off ⏱'})));
   var bw=document.getElementById('bannerwrap');
   if(state.role==='trader') bw.replaceChildren(h('div',{class:'banner'}, rich('**Your book — desk EQ-DERIV-01.** You’re alerted the moment one of your trades is predicted to break, so you fix the booking detail before it becomes Operations’ problem.')));
   else if(state.role==='overview') bw.replaceChildren(h('div',{class:'banner'}, rich('**Manager view.** The queue stays here; the panel shows today’s overview. Click any item to drill into the trade.')));
+  else if(state.role==='team') bw.replaceChildren(h('div',{class:'banner'}, rich('**Accountability view.** Every predicted break routes to one owner. Click a person to open their channel, or a queue item to drill in.')));
   else bw.replaceChildren();
   document.getElementById('ltitle').textContent = state.role==='trader' ? 'Your Book' : 'Prevention Queue';
 }
@@ -380,15 +453,16 @@ function renderBlotter(){
       h('div',{class:'r1'}, h('span',{class:'sdot s-'+t.status}), h('span',{class:'inst',text:t.inst}),
         h('span',{class:'tag s-'+t.status,text:t.status==='break'?t.prob+'% break':t.status==='warning'?t.prob+'% risk':'clean'})),
       h('div',{class:'r2'}, h('span',{text:t.side+' '+t.qty}), h('span',{text:'·'}), h('span',{text:t.cpty})),
-      h('div',{class:'r1b'}, h('span',{class:'id',text:t.id}), co?h('span',{class:'cutoff',text:'⏱ '+co}):null));
+      h('div',{class:'r1b'}, h('span',{class:'id',text:t.id}), t.assignee?h('span',{class:'avmini',title:'Assigned — '+member(t.assignee).name,text:member(t.assignee).init}):null, co?h('span',{class:'cutoff',text:'⏱ '+co}):null));
   })));
 }
-function select(id){ state.sel=id; state.lens='Front Office'; if(state.role==='overview')state.role='ops'; render(); }
+function select(id){ state.sel=id; state.lens='Front Office'; if(state.role==='overview'||state.role==='team')state.role='ops'; if(state.role==='trader'){var tt=TRADES.find(function(x){return x.id===id;}); if(tt&&tt.book!==TRADER_DESK)state.role='ops';} render(); }
 function trade(){return TRADES.find(function(t){return t.id===state.sel;});}
 
 function render(){
   renderRoles(); renderPQHead(); renderBlotter();
   if(state.role==='overview') mount('right', renderOverview());
+  else if(state.role==='team') mount('right', renderTeam());
   else renderDetail();
 }
 
@@ -404,19 +478,19 @@ function renderOverview(){
     h('span',{class:'co',text:'⏱ '+(t.ai?t.ai.ddl:'')}));});
   return h('div',{class:'ov'},
     h('div',{class:'ovh',text:'Operations Overview'}),
-    h('div',{class:'ovsub',text:'Listed derivatives · Montréal Exchange · 2026-09-14 · 14:21 ET'}),
+    h('div',{class:'ovsub',text:'Listed derivatives · Montréal Exchange · 2026-09-14'}),
     h('div',{class:'ovgrid'},
       h('div',{class:'ovcard red'}, h('div',{class:'big',text:String(wb.length)}), h('div',{class:'lab',text:'Predicted breaks'}), h('div',{class:'sb',text:'flagged before cut-off'})),
       h('div',{class:'ovcard amber'}, h('div',{class:'big',text:String(ar.length)}), h('div',{class:'lab',text:'At risk'}), h('div',{class:'sb',text:'monitoring'})),
-      h('div',{class:'ovcard green'}, h('div',{class:'big',text:'7'}), h('div',{class:'lab',text:'Prevented today'}), h('div',{class:'sb',text:'fixed upstream — no break (illustrative)'})),
+      h('div',{class:'ovcard green'}, h('div',{class:'big',text:String(7+resolvedBreaks+resolvedRisk)}), h('div',{class:'lab',text:'Prevented today'}), h('div',{class:'sb',text:'fixed upstream — no break (illustrative)'})),
       h('div',{class:'ovcard cyan'}, h('div',{class:'big',text:'≈0'}), h('div',{class:'lab',text:'Internal reconciliation'}), h('div',{class:'sb',text:'nothing to reconcile between desks'}))),
     h('div',{class:'ovsec',text:'By desk'}),
     h('table',{class:'ovtable'},
       h('thead',{}, h('tr',{}, h('th',{text:'Desk'}), h('th',{text:'Open events'}), h('th',{text:'At risk'}), h('th',{text:'Will break'}))),
       h('tbody',{}, deskRows)),
     h('div',{class:'ovsec',text:'Top predicted breaks — click to resolve'}),
-    h('div',{class:'ovtop'}, topRows),
-    h('div',{class:'valuenote'}, rich('Today FIOS flagged **'+wb.length+' breaks** and **'+ar.length+' at-risk** trades at point-of-capture — before they reached clearing. Internal reconciliation workload: **≈ 0** (one event, many internal consumers). External items to confirm against CDCC / custodian records before cut-off: **'+wb.length+'** — a single clean-source check, not matching diverged copies.')));
+    h('div',{class:'ovtop'}, topRows.length?topRows:h('div',{class:'ovtoprow'},h('span',{class:'pct',style:'color:var(--green)',text:'✓'}),h('div',{},h('div',{class:'nm',text:'No open predicted breaks'}),h('div',{class:'ds',text:'everything cleared upstream before cut-off'})))),
+    h('div',{class:'valuenote'}, rich('Today FIOS flagged **'+(wb.length+resolvedBreaks)+' breaks** and **'+(ar.length+resolvedRisk)+' at-risk** trades at point-of-capture'+(wb.length?' — before they reached clearing':' — all already resolved upstream; nothing reached clearing broken')+'. Internal reconciliation workload: **≈ 0** (one event, many internal consumers). External items to confirm against CDCC / custodian records before cut-off: **'+wb.length+'** — a single clean-source check, not matching diverged copies.')));
 }
 
 function renderDetail(){
@@ -436,7 +510,8 @@ function renderDetail(){
   mount('right', h('div',{class:'detail'},
     h('div',{class:'dhead'}, h('div',{class:'top'},
       h('div',{}, h('h2',{text:t.inst}), h('div',{class:'meta',text:t.desc}),
-        h('div',{class:'meta',style:'margin-top:6px',text:t.id+' · '+t.side+' '+t.qty+' @ '+t.price.toFixed(2)+' '+t.ccy+' · '+t.cpty})),
+        h('div',{class:'meta',style:'margin-top:6px',text:t.id+' · '+t.side+' '+t.qty+' @ '+t.price.toFixed(2)+' '+t.ccy+' · '+t.cpty}),
+        t.assignee?h('div',{class:'asgline',text:'● Assigned — '+member(t.assignee).name+' · '+member(t.assignee).role}):null),
       h('div',{class:'right-tag'}, h('div',{class:'prob s-'+t.status,text:t.status==='healthy'?'✓':t.prob+'%'}),
         h('div',{class:'prob-l',text:t.status==='healthy'?'clean · settled':'break probability'})))),
     secs));
@@ -452,7 +527,13 @@ function aiBox(t){
       h('div',{class:'row'}, h('div',{class:'k',text:'Cause'}), h('div',{class:'v'}, rich(t.ai.cause))),
       h('div',{class:'row'}, h('div',{class:'k',text:'Impact'}), h('div',{class:'v'}, rich(t.ai.impact))),
       h('div',{class:'row'}, h('div',{class:'k',text:'Fix'}), h('div',{class:'v fix'}, rich(t.ai.fix)))),
-    h('div',{class:'actions'}, h('button',{class:'btn primary',text:'Apply fix on golden event',onclick:function(){resolve(t.id);}}), h('button',{class:'btn',text:'Assign to ops queue'})));
+    h('div',{class:'actions'},
+      h('button',{class:'btn primary',text:'Apply fix on golden event',onclick:function(){resolve(t.id);}}),
+      h('button',{class:'btn',text:t.assignee?'Reassign — '+member(t.assignee).name:'Assign to owner',onclick:function(){openAssign(t.id);}}),
+      EXC_TYPE[t.id]==='give-up'
+        ?h('button',{class:'btn',style:'border-color:rgba(232,201,125,.5);color:var(--gold)',text:'⇄ Resolve live with BNS-CLEAR',onclick:function(){openTeamChat('bns');}})
+        :h('button',{class:'btn',text:'Discuss in chat',onclick:function(){openTeamChat('ops');}})),
+    t.assignee?h('div',{class:'asgline',text:'● Owner notified in #ops-listed-derivatives — escalates to '+escalateFor(member(t.assignee)).name+' if unresolved near cut-off'}):null);
 }
 function simBox(t){
   var flow=[];
@@ -496,6 +577,7 @@ function geBox(t){
 }
 function resolve(id){
   var t=TRADES.find(function(x){return x.id===id;});
+  if(t.status==='break')resolvedBreaks++; else if(t.status==='warning')resolvedRisk++;
   t.status='healthy';t.prob=2;t.ai=null;
   t.lifecycle=t.lifecycle.map(function(s){return [s[0],'done',s[2]==='—'?'14:18:30':s[2]];});
   t.sim=t.sim.map(function(s){return [s[0],'ok'];});
@@ -511,6 +593,170 @@ function toast(msg){
   toastTimer=setTimeout(function(){el.style.opacity='0';setTimeout(function(){el.remove();},420);},3400);
 }
 
+/* ===== Team, accountability routing & chat (incl. cross-firm FIOS Link) ===== */
+const EXC_TYPE={'EVT-SXF-100482':'give-up','EVT-CRA-100455':'allocation','EVT-OCX-100501':'refdata','EVT-SXM-100488':'ssi'};
+const TEAM=[
+ {id:'u-iv',name:'Isabelle Veilleux',init:'IV',role:'Head of Operations',dept:'Operations',line:'All',resp:'Escalation owner — all business lines',presence:'online',tier:1},
+ {id:'u-mb',name:'Marc Bélanger',init:'MB',role:'Ops Manager — Listed Derivatives',dept:'Operations',line:'EQ-DERIV-01',resp:'Give-up / take-up & clearing breaks',presence:'online',tier:2,specialties:['give-up']},
+ {id:'u-sl',name:'Sophie Lavoie',init:'SL',role:'Ops Analyst',dept:'Operations',line:'EQ-DERIV-01',resp:'Give-ups, allocations & CDCC buffer',presence:'online',tier:3,specialties:['give-up','allocation']},
+ {id:'u-ak',name:'Amir Khalil',init:'AK',role:'Ops Analyst',dept:'Operations',line:'FI-RATES-03',resp:'Rates allocations & SSI follow-ups',presence:'away',tier:3,specialties:['allocation','ssi']},
+ {id:'u-pd',name:'Priya Desai',init:'PD',role:'Product Data Steward',dept:'Middle Office',line:'All',resp:'Security master & corporate actions',presence:'online',tier:0,specialties:['refdata']},
+ {id:'u-lm',name:'Luc Morin',init:'LM',role:'Settlements Officer',dept:'Back Office',line:'All',resp:'SSIs & custodian instructions',presence:'online',tier:0,specialties:['ssi']},
+ {id:'u-jt',name:'Jean Tremblay',init:'JT',role:'Trader — Equity Derivatives',dept:'Front Office',line:'EQ-DERIV-01',resp:'SXF / SXM execution',presence:'online',tier:0},
+ {id:'u-nc',name:'Nadia Chen',init:'NC',role:'Compliance Officer',dept:'Compliance',line:'All',resp:'CIRO trade reporting & NI 96-101',presence:'online',tier:0},
+ {id:'u-rg',name:'Renée Gagnon',init:'RG',role:'Risk Manager',dept:'Risk',line:'All',resp:'MERIS margin & desk limits',presence:'online',tier:0},
+];
+function member(id){return TEAM.find(function(p){return p.id===id;});}
+function openItems(p){return TRADES.filter(function(t){return t.assignee===p.id&&t.status!=='healthy';}).length;}
+function suggestFor(t){
+  var k=EXC_TYPE[t.id];
+  var pool=TEAM.filter(function(p){return p.specialties&&p.specialties.indexOf(k)>-1;});
+  pool.sort(function(a,b){return (b.tier||0)-(a.tier||0);});
+  var best=pool.filter(function(p){return p.line===t.book;})[0]||pool.filter(function(p){return p.line==='All';})[0]||pool[0];
+  var others=pool.filter(function(p){return p!==best;});
+  return {best:best,others:others,kind:k};
+}
+function escalateFor(p){return member(p.tier===3?'u-mb':'u-iv');}
+function refreshOverlay(){
+  var any=document.getElementById('assistant').classList.contains('on')
+    ||document.getElementById('teamchat').classList.contains('on')
+    ||document.getElementById('assignmodal').classList.contains('on');
+  document.getElementById('overlay').classList.toggle('on',any);
+}
+function openAssign(id){
+  var t=TRADES.find(function(x){return x.id===id;});
+  var s=suggestFor(t);
+  var mk=function(p,best){return h('div',{class:'acand'+(best?' best':''),onclick:function(){assign(t,p);}},
+    h('span',{class:'av2',text:p.init}),
+    h('div',{},
+      h('div',{style:'font-size:13px;font-weight:650;display:flex;align-items:center;gap:7px'},h('span',{class:'pres '+p.presence}),p.name),
+      h('div',{style:'font-size:11px;color:var(--cyan)',text:p.role+' · '+p.dept}),
+      best?h('div',{class:'why',text:'FIOS suggestion — owns "'+s.kind+'" exceptions'+(p.line===t.book?' on '+t.book:'')+' · '+openItems(p)+' open item(s)'})
+          :h('div',{style:'font-size:10px;color:var(--faint)',text:p.resp})));};
+  mount('assigninner', h('div',{class:'abox'},
+    h('h4',{text:'Assign '+t.id}),
+    h('div',{class:'asub',text:t.inst+' — '+(t.ai?t.ai.head:'')}),
+    h('div',{class:'albl',text:'Suggested owner'}), mk(s.best,true),
+    s.others.length?h('div',{class:'albl',text:'Other eligible owners'}):null, s.others.map(function(p){return mk(p,false);}),
+    h('div',{style:'margin-top:10px;text-align:right'},h('button',{class:'btn',text:'Cancel',onclick:closeAssign}))));
+  document.getElementById('assignmodal').classList.add('on');
+  refreshOverlay();
+}
+function closeAssign(){document.getElementById('assignmodal').classList.remove('on');refreshOverlay();}
+function assign(t,p){
+  t.assignee=p.id; closeAssign();
+  pushChat('ops',{side:'sys',text:'FIOS routed **'+t.id+'** ('+EXC_TYPE[t.id]+') to **'+p.name+'** — '+p.role+'.'});
+  toast('Assigned to '+p.name+' — notified in #ops-listed-derivatives.');
+  render();
+}
+
+const CHANNELS=[
+ {id:'ops',name:'#ops-listed-derivatives',desc:'Your team',ext:false},
+ {id:'front',name:'#front-office',desc:'Trading desk bridge',ext:false},
+ {id:'comp',name:'#compliance',desc:'Compliance bridge',ext:false},
+ {id:'bns',name:'⇄ BNS-CLEAR',desc:'Carrying broker · FIOS Link (cross-firm)',ext:true},
+];
+let chatCh='ops', bnsSent=false;
+const CHATLOG={
+ ops:[
+  {who:'Marc Bélanger',init:'MB',time:'14:13',text:'Heads-up — FIOS flags **2 predicted breaks** ahead of the 15:30 CDCC cut-off: **EVT-SXF-100482** (give-up gap) and **EVT-OCX-100501** (stale multiplier). Pick them up from the prevention queue.',ref:'EVT-SXF-100482'},
+  {who:'Sophie Lavoie',init:'SL',time:'14:14',text:'Taking the SXF give-up — opening a FIOS Link to BNS-CLEAR to confirm take-up on account 450.'},
+ ],
+ front:[
+  {who:'Jean Tremblay',init:'JT',tag:'FRONT',time:'14:07',text:'Ops — my 250-lot **SXF Sep-26** at 1284.40: anything blocking? Client expects the give-up at BNS.',ref:'EVT-SXF-100482'},
+  {who:'Sophie Lavoie',init:'SL',side:'out',time:'14:15',text:'Caught at capture — take-up confirm missing on account 450. Resolving live with BNS over the FIOS Link; will clear well before the 15:30 cut-off.'},
+ ],
+ comp:[
+  {who:'Nadia Chen',init:'NC',tag:'COMPLIANCE',time:'14:08',text:'FYI — the CIRO / **NI 96-101** report for **EVT-SXF-100482** is staged but held until the give-up resolves. Fixed pre-cut-off = no amendment filing.',ref:'EVT-SXF-100482'},
+ ],
+ bns:[
+  {side:'sys',text:'Secure bilateral **FIOS Link** with BNS-CLEAR Operations. Each firm sees only the events it is party to — same golden event, two authorized views. **No data pooling.**'},
+ ],
+};
+function pushChat(ch,m){CHATLOG[ch].push(m);if(document.getElementById('teamchat').classList.contains('on'))renderTeamChat();}
+function openTeamChat(ch){
+  if(ch)chatCh=ch;
+  document.getElementById('assistant').classList.remove('on');
+  document.getElementById('teamchat').classList.add('on');
+  refreshOverlay();renderTeamChat();
+}
+function closeTeamChat(){document.getElementById('teamchat').classList.remove('on');refreshOverlay();}
+function chMsg(m){
+  if(m.side==='sys')return h('div',{class:'cmsg sys'},rich(m.text),m.card?confCard():null);
+  return h('div',{class:'cmsg'+(m.side==='out'?' out':'')},
+    h('div',{class:'cwho'},h('span',{class:'av2',text:m.init||'?'}),h('span',{class:'cname'+(m.ext?' ext':''),text:m.who}),m.tag?h('span',{class:'ctag',text:m.tag}):null,h('span',{class:'ctime',text:m.time||'now'})),
+    h('div',{class:'cbody'},rich(m.text),
+      m.ref?h('div',{class:'resref'},h('div',{class:'rr',onclick:function(){select(m.ref);closeTeamChat();}},'↗ ',h('b',{text:m.ref}),' · open event')):null,
+      m.card?confCard():null));
+}
+function renderTeamChat(){
+  mount('tchans',h('div',{style:'display:flex;gap:5px;flex-wrap:wrap'},CHANNELS.map(function(c){
+    return h('div',{class:'chtab'+(c.ext?' ext':'')+(chatCh===c.id?' on':''),text:c.name,title:c.desc,onclick:function(){chatCh=c.id;renderTeamChat();}});})));
+  mount('tcbody',h('div',{style:'display:flex;flex-direction:column;gap:12px'},CHATLOG[chatCh].map(chMsg)));
+  var sg=[];
+  var sx=TRADES.find(function(x){return x.id==='EVT-SXF-100482';});
+  if(chatCh==='bns'&&!bnsSent&&sx.status!=='healthy')
+    sg.push(h('div',{class:'s',text:'Request take-up confirmation for EVT-SXF-100482 (account 450)',onclick:sendBnsRequest}));
+  mount('tcsugg',h('div',{style:'display:flex;flex-direction:column;gap:7px'},sg));
+  var b=document.getElementById('tcbody');b.scrollTop=b.scrollHeight;
+}
+function bnsReply(){
+  setTimeout(function(){
+    pushChat('bns',{who:'M. Okafor — BNS-CLEAR Ops',init:'MO',ext:true,tag:'EXTERNAL',time:'14:20',text:'Confirmed on our node — give-up agreement **GU-2218** is active, take-up account **450**. Same golden event, same view on both sides. Apply when ready.',card:true});
+  },1400);
+}
+function sendBnsRequest(){
+  bnsSent=true;
+  pushChat('bns',{who:'Sophie Lavoie (you)',init:'SL',side:'out',time:'14:19',text:'Hi — **EVT-SXF-100482**, SXF Sep-26 BUY 250, flagged give-up to you. We’re missing the take-up confirmation on account **450** ahead of the **15:30 CDCC cut-off**. Can you confirm on your node?'});
+  renderTeamChat();
+  bnsReply();
+}
+function confCard(){
+  var t=TRADES.find(function(x){return x.id==='EVT-SXF-100482';});
+  return h('div',{class:'ccard'},
+    h('div',{class:'ct',text:'TAKE-UP CONFIRMATION — STRUCTURED'}),
+    h('div',{class:'cr'},'Account ',h('b',{text:'450'}),'  ·  Agreement ',h('b',{text:'GU-2218'}),'  ·  Carrying broker BNS-CLEAR'),
+    t.status!=='healthy'
+      ?h('button',{class:'btn primary',style:'margin-top:10px',text:'Apply to golden event',onclick:applyFromChat})
+      :h('div',{class:'capplied',text:'✓ Applied to the golden event'}));
+}
+function applyFromChat(){
+  resolve('EVT-SXF-100482');
+  pushChat('bns',{side:'sys',text:'✓ Applied — give-up resolved on **EVT-SXF-100482**, 1h10 before the cut-off. Clearing, booking and the CIRO / NI 96-101 report updated from the same golden event — on **both firms’** projections.'});
+  renderTeamChat();
+}
+function sendTeamMsg(){
+  var el=document.getElementById('tcinput');var v=el.value.trim();if(!v)return;el.value='';
+  pushChat(chatCh,{who:'You — Ops',init:'SL',side:'out',text:v});
+  var sx=TRADES.find(function(x){return x.id==='EVT-SXF-100482';});
+  if(chatCh==='bns'){
+    if(!bnsSent&&sx.status!=='healthy'){ bnsSent=true; bnsReply(); }
+    else setTimeout(function(){pushChat('bns',{who:'M. Okafor — BNS-CLEAR Ops',init:'MO',ext:true,tag:'EXTERNAL',time:'now',text:'We’re aligned on our side — same golden event, same view. Ping us if anything else flags before the cut-off.'});},1200);
+  }
+  renderTeamChat();
+}
+
+function renderTeam(){
+  var card=function(p){return h('div',{class:'person',onclick:function(){openTeamChat(p.dept==='Front Office'?'front':p.dept==='Compliance'?'comp':'ops');}},
+    h('div',{class:'nm'},h('span',{class:'pres '+p.presence}),p.name),
+    h('div',{class:'rl',text:p.role}),
+    h('div',{class:'rs',text:p.resp}),
+    h('div',{class:'ln'},h('span',{text:p.line==='All'?'All business lines':p.line}),h('span',{class:'oi',text:openItems(p)?openItems(p)+' open':''})));};
+  var tier=function(n){return TEAM.filter(function(p){return p.tier===n;});};
+  var partners=TEAM.filter(function(p){return p.tier===0;});
+  return h('div',{class:'teamwrap'},
+    h('div',{class:'ovh',text:'Team & Accountability'}),
+    h('div',{class:'ovsub',text:'Every exception has ONE owner — routed by exception type, business line and hierarchy. Click a person to open a channel with their function.'}),
+    h('div',{class:'ovsec',text:'Operations hierarchy'}),
+    h('div',{class:'torg'},
+      h('div',{class:'trow2'},tier(1).map(card)),h('div',{class:'tconn'}),
+      h('div',{class:'trow2'},tier(2).map(card)),h('div',{class:'tconn'}),
+      h('div',{class:'trow2'},tier(3).map(card))),
+    h('div',{class:'ovsec',text:'Partner functions — same golden event, their lens'}),
+    h('div',{class:'trow2',style:'justify-content:flex-start'},partners.map(card)),
+    h('div',{class:'valuenote'},rich('**Accountability routing.** When FIOS predicts a break it doesn’t just flag it — it routes it to the one person whose mandate covers that exception type on that business line, notifies their channel, and escalates up the hierarchy as the cut-off approaches. And because counterparties on the network share the same golden event, the fix conversation happens **live over a bilateral FIOS Link** — not over email chains and next-morning break reports.')));
+}
+
 const QA=[
  {q:'Which trades will break today?',a:function(){var b=TRADES.filter(function(t){return t.status==='break';}),w=TRADES.filter(function(t){return t.status==='warning';});
    return {nodes:rich('**'+b.length+' trades** are predicted to break before their cut-offs, plus '+w.length+' at-risk. FIOS flagged each at point-of-capture — all fixable upstream before they propagate:'),
@@ -522,13 +768,18 @@ const QA=[
  {q:'Show the give-up exceptions.',a:function(){var g=TRADES.filter(function(t){return t.acct.indexOf('GIVE-UP')>-1&&t.status!=='healthy';});
    return {nodes:rich(g.length+' give-up / take-up exception(s) open. Give-ups route to the carrying broker; an unresolved give-up account sends the position to the executing broker’s buffer at the 15:30 CDCC cut-off:'),
      refs:g.map(function(t){return [t.id,t.inst+' — '+gu(t)];})};}},
+ {q:'Who owns the SXF give-up break?',a:function(){var t=TRADES.find(function(x){return x.id==='EVT-SXF-100482';});
+   if(t.status==='healthy')return {nodes:rich('Resolved — the give-up was confirmed with BNS-CLEAR over the bilateral FIOS Link and applied to the golden event.'),refs:[['EVT-SXF-100482','Open event']]};
+   var p=t.assignee?member(t.assignee):suggestFor(t).best;
+   return {nodes:rich((t.assignee?'**Assigned to '+p.name+'**':'**Suggested owner: '+p.name+'**')+' — '+p.role+' ('+p.resp+').'+(t.assignee?'':' Not yet assigned — FIOS routes give-up exceptions on EQ-DERIV-01 to their mandate.')+' You can also resolve it live with BNS-CLEAR over the FIOS Link.'),refs:[['EVT-SXF-100482','Open event']]};}},
 ];
 let chat=[];
 function openAssistant(){
-  document.getElementById('assistant').classList.add('on');document.getElementById('overlay').classList.add('on');
+  document.getElementById('teamchat').classList.remove('on');
+  document.getElementById('assistant').classList.add('on');refreshOverlay();
   if(!chat.length){pushA({nodes:[document.createTextNode('I’m the FIOS Operations Assistant. I reason over the live golden-event store — ask me anything about today’s flow. Try one of these:')],refs:[]});renderSugg();}
 }
-function closeAssistant(){document.getElementById('assistant').classList.remove('on');document.getElementById('overlay').classList.remove('on');}
+function closeAssistant(){document.getElementById('assistant').classList.remove('on');refreshOverlay();}
 function renderSugg(){mount('sugg',h('div',{},QA.map(function(x,i){return h('div',{class:'s',text:x.q,onclick:function(){ask(i);}});})));}
 function pushU(t){chat.push({r:'u',t:t});renderChat();}
 function pushA(o){chat.push({r:'a',o:o});renderChat();}
@@ -545,21 +796,27 @@ function ask(i){pushU(QA[i].q);setTimeout(function(){pushA(QA[i].a());},260);}
 function sendAsk(){
   var el=document.getElementById('ainput');var v=el.value.trim();if(!v)return;el.value='';
   pushU(v);var low=v.toLowerCase();var hit=null;
-  if(low.indexOf('sxf')>-1||low.indexOf('100482')>-1)hit=QA[1];
+  if(low.indexOf('who')>-1||low.indexOf('own')>-1||low.indexOf('assign')>-1)hit=QA[4];
+  else if(low.indexOf('sxf')>-1||low.indexOf('100482')>-1)hit=QA[1];
   else if(low.indexOf('recon')>-1||low.indexOf('workload')>-1)hit=QA[2];
   else if(low.indexOf('give')>-1||low.indexOf('take-up')>-1)hit=QA[3];
   else if(low.indexOf('break')>-1||low.indexOf('today')>-1||low.indexOf('fail')>-1)hit=QA[0];
-  setTimeout(function(){ if(hit)pushA(hit.a()); else pushA({nodes:[document.createTextNode('In this prototype I answer over the synthetic listed-derivatives book. Try: which trades will break today · why will SXF Sep-26 break · today’s reconciliation workload · the give-up exceptions.')],refs:[]});},260);
+  setTimeout(function(){ if(hit)pushA(hit.a()); else pushA({nodes:[document.createTextNode('In this prototype I answer over the synthetic listed-derivatives book. Try: which trades will break today · why will SXF Sep-26 break · today’s reconciliation workload · the give-up exceptions · who owns the SXF break.')],refs:[]});},260);
 }
 
 document.getElementById('askbtn').addEventListener('click',openAssistant);
 document.getElementById('aclose').addEventListener('click',closeAssistant);
-document.getElementById('overlay').addEventListener('click',closeAssistant);
+document.getElementById('overlay').addEventListener('click',function(){closeAssistant();closeTeamChat();closeAssign();});
 document.getElementById('asend').addEventListener('click',sendAsk);
 document.getElementById('ainput').addEventListener('keydown',function(e){if(e.key==='Enter')sendAsk();});
+document.getElementById('chatbtn').addEventListener('click',function(){openTeamChat();});
+document.getElementById('tcclose').addEventListener('click',closeTeamChat);
+document.getElementById('tcsend').addEventListener('click',sendTeamMsg);
+document.getElementById('tcinput').addEventListener('keydown',function(e){if(e.key==='Enter')sendTeamMsg();});
+document.getElementById('assignmodal').addEventListener('click',function(e){if(e.target===this)closeAssign();});
 
 var sec=2;
-setInterval(function(){sec=(sec+1)%3600;var mm=18+Math.floor(sec/60),ss=sec%60;document.getElementById('clock').textContent='14:'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0')+' ET';},1000);
+setInterval(function(){sec++;var tot=18*60+sec;var hh=14+Math.floor(tot/3600),mm=Math.floor(tot/60)%60,ss=tot%60;document.getElementById('clock').textContent=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0')+' ET';},1000);
 
 renderFilters();render();
 </script>
