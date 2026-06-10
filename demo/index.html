@@ -298,6 +298,15 @@
   .qs{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:11.5px;font-family:var(--sans);min-width:80px}
   .qs:focus{outline:none;border-color:var(--gold-dim)}
 
+  .frecompute{stroke:var(--amber)!important;animation:fpulse .55s ease-in-out infinite}
+  .cmpstrip{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+  .cmpcol{border:1px solid;border-radius:9px;padding:10px 12px}
+  .cmpcol.old{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.04)}
+  .cmpcol.new{border-color:rgba(84,224,155,.35);background:rgba(84,224,155,.05)}
+  .cmph{font-size:9px;font-weight:800;letter-spacing:.8px}
+  .cmpcol.old .cmph{color:var(--red)} .cmpcol.new .cmph{color:var(--green)}
+  .cmpb{font-size:11.5px;color:var(--text);line-height:1.5;margin-top:5px}
+  @media(max-width:560px){.cmpstrip{grid-template-columns:1fr}}
   @media(max-width:980px){.app{grid-template-columns:1fr}.left{display:none}.roles{display:none}}
 </style>
 </head>
@@ -616,7 +625,7 @@ function flowerView(t){
   fs.forEach(function(f,i){var a=(-90+i*60)*Math.PI/180;var x=cx+D*Math.cos(a),y=cy+D*Math.sin(a);
     var g=sv('g',{'class':(dimmed(f)?'dim':''),style:(f.st==='fail'||f.st==='warning')?'cursor:pointer':'',
       onclick:function(){if(f.st==='fail'||f.st==='warning'){var ai=document.querySelector('.ai');if(ai)ai.scrollIntoView({behavior:'smooth'});}}},
-      sv('circle',{cx:x,cy:y,r:R,'class':'fc fc-'+f.st+(f.st==='fail'?' fpulse':'')}),
+      sv('circle',{cx:x,cy:y,r:R,'class':'fc fc-'+f.st+(f.st==='fail'?' fpulse':'')+(surgFlash&&surgFlash.id===t.id&&surgFlash.facets[f.name]?' frecompute':'')}),
       sv('text',{x:x,y:y-8,'class':'flab','text-anchor':'middle'},document.createTextNode(f.name)),
       sv('text',{x:x,y:y+10,'class':'ftime','text-anchor':'middle'},document.createTextNode(f.time)),
       sv('text',{x:x,y:y+30,'class':'fst fs-'+f.st,'text-anchor':'middle'},document.createTextNode(f.st==='done'?'✓':f.st==='warning'?'!':f.st==='fail'?'✕':'·')));
@@ -650,7 +659,7 @@ const HIST={
   {t:'13:52:40',cat:'human',type:'ALLOCATE',actor:'M. Girard · TRD-3318',det:'Split 300 / 180 across sub-accounts — **480 of 500**'},
   {t:'13:52:41',cat:'exc',type:'EXCEPTION',actor:'FIOS AI',det:'Predicted break **34%** — 20-lot residual unallocated · EOD booking at risk'},
   {t:'13:53:11',cat:'sys',type:'MATCH',actor:'FIOS gates',det:'House trade confirmed — no give-up applicable'},
-  {t:'13:55:07',cat:'sys',type:'CLEAR',actor:'CDCC feed',det:'Cleared · novated at CDCC (allocated portion)'},
+  {t:'13:55:07',cat:'sys',type:'CLEAR',actor:'CDCC feed',det:'Cleared · novated at CDCC — executed 500'},
  ],
  'EVT-OCX-100501':[
   {t:'14:11:55',cat:'sys',type:'CAPTURE',actor:'MX drop-copy',det:'TradeExecuted — BUY 120 RY 145C Oct-26 @ 3.85'},
@@ -716,8 +725,13 @@ function aiBox(t){
       h('div',{class:'row'}, h('div',{class:'k',text:'Cause'}), h('div',{class:'v'}, rich(t.ai.cause))),
       h('div',{class:'row'}, h('div',{class:'k',text:'Impact'}), h('div',{class:'v'}, rich(t.ai.impact))),
       h('div',{class:'row'}, h('div',{class:'k',text:'Fix'}), h('div',{class:'v fix'}, rich(t.ai.fix)))),
+    t.id==='EVT-CRA-100455'?h('div',{class:'cmpstrip'},
+      h('div',{class:'cmpcol old'},h('div',{class:'cmph',text:'⟲ CHAIN SYSTEM — THE OLD WAY'}),h('div',{class:'cmpb'},rich('Every lineage event from the allocation onward — allocation, match, clearing — **unwound, corrected, then replayed forward**. The whole trade re-risked to fix 20 lots.'))),
+      h('div',{class:'cmpcol new'},h('div',{class:'cmph',text:'✿ FIOS — SURGICAL FIX'}),h('div',{class:'cmpb'},rich('**Supersede the one allocation fact** (v2 appended, v1 retained). Only its true dependents — booking, instruction — recompute. **Confirmed and Cleared are never touched.**')))):null,
     h('div',{class:'actions'},
-      h('button',{class:'btn primary',text:'Apply fix on golden event',onclick:function(){resolve(t.id);}}),
+      t.id==='EVT-CRA-100455'
+        ?h('button',{class:'btn primary',text:'⚕ Surgical fix — supersede this fact only',onclick:function(){surgicalFix(t.id);}})
+        :h('button',{class:'btn primary',text:'Apply fix on golden event',onclick:function(){resolve(t.id);}}),
       h('button',{class:'btn',text:t.assignee?'Reassign — '+member(t.assignee).name:'Assign to owner',onclick:function(){openAssign(t.id);}}),
       EXC_TYPE[t.id]==='give-up'
         ?h('button',{class:'btn',style:'border-color:rgba(232,201,125,.5);color:var(--gold)',text:'⇄ Resolve live with BNS-CLEAR',onclick:function(){openTeamChat('bns');}})
@@ -775,6 +789,28 @@ function resolve(id){
   HIST[id].push({t:clockNow(),cat:'sys',type:'PROJECT',actor:'FIOS projections',det:'Downstream projections regenerated — clearing · booking · margin · CIRO / NI 96-101'});}
   render();
   toast('Fix applied on the golden event — propagated to clearing, booking & the CIRO / NI 96-101 obligation.');
+}
+
+/* ===== Surgical supersession — per-event-only fix (no unwind, no replay) ===== */
+let surgFlash=null;
+function surgicalFix(id){
+  var t=TRADES.find(function(x){return x.id===id;});
+  if(!t||t.status==='healthy')return;
+  if(t.status==='break')resolvedBreaks++; else if(t.status==='warning')resolvedRisk++;
+  state.breaksOnly=false;
+  t.status='healthy';t.prob=2;t.ai=null;
+  t.lifecycle=t.lifecycle.map(function(s){
+    return (s[1]==='done')?s:[s[0],'done',clockNow()];
+  });
+  t.sim=t.sim.map(function(s){return [s[0],'ok'];});
+  if(HIST[id]){
+    HIST[id].push({t:clockNow(),cat:'amend',type:'SUPERSEDE',actor:'S. Lavoie · OPS',det:'Allocation fact **superseded** — residual 20 lots → HOUSE-22 (v2 appended; v1 retained, business time 13:52:40). **Nothing reverted.**'});
+    HIST[id].push({t:clockNow(),cat:'sys',type:'PROJECT',actor:'FIOS projections',det:'Blast radius = **dependency cone only**: Booked + Instructed recomputed. **Confirmed (13:53:11) and Cleared (13:55:07) untouched — original timestamps intact.**'});
+  }
+  surgFlash={id:id,facets:{'Allocated':1,'Booked':1,'Instructed':1}};
+  setTimeout(function(){surgFlash=null;document.querySelectorAll('.frecompute').forEach(function(c){c.classList.remove('frecompute');});},2200);
+  render();
+  toast('Surgical fix — 1 fact superseded → its 2 dependent projections recomputed; everything already done was never touched.');
 }
 var toastTimer;
 function toast(msg){
