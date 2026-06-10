@@ -250,6 +250,54 @@
   .acand .why{font-size:10px;color:var(--gold);margin-top:2px}
   .albl{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:12px 0 8px}
 
+  /* Flower-of-Life lifecycle view */
+  .flowersvg{width:100%;max-width:680px;display:block;margin:0 auto}
+  .fline{stroke:#2b2b36;stroke-width:1.5}
+  .fc{fill:rgba(18,18,24,.55);stroke-width:2}
+  .fc-done{stroke:var(--green);fill:rgba(84,224,155,.05)}
+  .fc-warning{stroke:var(--amber);fill:rgba(246,191,82,.06)}
+  .fc-fail{stroke:var(--red);fill:rgba(248,113,113,.08)}
+  .fc-pending{stroke:#4a4a58;stroke-dasharray:5 5;fill:rgba(255,255,255,.01)}
+  .fcenter{fill:rgba(232,201,125,.07);stroke:var(--gold);stroke-width:2.2}
+  .flab{fill:#eceaf0;font-size:12.5px;font-weight:650;font-family:-apple-system,'Segoe UI',sans-serif}
+  .fclab{fill:var(--gold);font-size:11px;font-weight:800;letter-spacing:2px;font-family:-apple-system,'Segoe UI',sans-serif}
+  .ftime{fill:#9a9aa8;font-size:10.5px;font-family:ui-monospace,Consolas,monospace}
+  .fst{font-size:13px;font-weight:700;font-family:-apple-system,'Segoe UI',sans-serif}
+  .fs-done{fill:var(--green)} .fs-warning{fill:var(--amber)} .fs-fail{fill:var(--red)} .fs-pending{fill:#6b6b78}
+  .dim{opacity:.13}
+  @keyframes fpulse{0%,100%{stroke-opacity:.45}50%{stroke-opacity:1}}
+  .fpulse{animation:fpulse 1.8s ease-in-out infinite}
+  .vtog{font-size:10.5px;color:var(--muted);border:1px solid var(--border);padding:4px 9px;border-radius:6px;cursor:pointer;font-weight:600;text-transform:none;letter-spacing:0}
+  .vtog:hover{border-color:var(--border2)}
+  .vtog.on{color:#0c0c11;background:var(--gold);border-color:var(--gold)}
+  .vtog.warn.on{background:var(--red);border-color:var(--red);color:#fff}
+
+  /* Trader identity card */
+  .tcard{display:flex;align-items:center;gap:9px;margin-top:10px;padding:8px 11px;background:var(--surface);border:1px solid var(--border);border-radius:9px;cursor:pointer;max-width:460px;transition:.12s}
+  .tcard:hover{border-color:var(--border2)}
+  .tnm{font-size:12.5px;font-weight:650;display:flex;align-items:center;gap:7px}
+  .tid{color:var(--faint);font-family:var(--mono);font-size:10.5px;font-weight:500}
+  .tct{font-size:10.5px;color:var(--muted);font-family:var(--mono);margin-top:1px}
+
+  /* Event history (forensic lineage) */
+  .histbox{background:#0c0c10;border:1px solid var(--border);border-radius:11px;padding:6px 0;max-height:360px;overflow-y:auto}
+  .hrow{display:grid;grid-template-columns:72px 90px 175px 1fr;gap:10px;padding:8px 16px;border-bottom:1px solid #17171e;font-size:11.5px;align-items:start}
+  .hrow:last-child{border-bottom:none}
+  .ht{font-family:var(--mono);color:var(--faint)}
+  .htype{font-size:9px;font-weight:800;letter-spacing:.6px;padding:2px 7px;border-radius:4px;text-align:center;white-space:nowrap}
+  .c-sys{background:rgba(106,215,230,.12);color:var(--cyan)}
+  .c-human{background:rgba(232,201,125,.12);color:var(--gold)}
+  .c-exc{background:rgba(248,113,113,.14);color:var(--red)}
+  .c-amend{background:rgba(84,224,155,.13);color:var(--green)}
+  .hactor{color:var(--muted);font-family:var(--mono);font-size:10.5px}
+  .hdet{color:var(--text);line-height:1.45}
+  .hq{margin-left:auto;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:6px 10px;color:var(--text);font-size:11.5px;width:215px;font-family:var(--sans)}
+  .hq:focus{outline:none;border-color:var(--gold-dim)}
+
+  /* Queue search + desk filter */
+  .qs{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:11.5px;font-family:var(--sans);min-width:80px}
+  .qs:focus{outline:none;border-color:var(--gold-dim)}
+
   @media(max-width:980px){.app{grid-template-columns:1fr}.left{display:none}.roles{display:none}}
 </style>
 </head>
@@ -281,6 +329,7 @@
     <div class="lhead"><span class="t" id="ltitle">Prevention Queue</span><span class="c" id="bcount"></span></div>
     <div class="pqhead" id="pqhead"></div>
     <div class="filters" id="filters"></div>
+    <div class="filters" id="filters2"></div>
     <div id="bannerwrap"></div>
     <div class="blotter" id="blotter"></div>
   </div>
@@ -336,17 +385,17 @@ function mount(id,node){document.getElementById(id).replaceChildren(node);}
 function rich(s){return s.split('**').map(function(p,i){return i%2?h('b',{text:p}):document.createTextNode(p);});}
 
 const TRADES=[
- {id:'EVT-SXF-100482',inst:'SXF Sep-26',desc:'S&P/TSX 60 Index Future · Montréal Exchange',side:'BUY',qty:250,price:1284.40,ccy:'CAD',
+ {id:'EVT-SXF-100482',trader:'u-jt',inst:'SXF Sep-26',desc:'S&P/TSX 60 Index Future · Montréal Exchange',side:'BUY',qty:250,price:1284.40,ccy:'CAD',
   cpty:'Meridian Global Fund',lei:'549300MERIDIAN0FUND',acct:'GIVE-UP 450',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100482',cfi:'FFIXSX',mult:200,
   status:'break',prob:97,
   lifecycle:[['Executed','done','14:02:11'],['Allocated','warning','14:05:33'],['Give-Up','fail','—'],['Cleared','pending','—'],['Booked','pending','—'],['Instructed','pending','—']],
-  ai:{head:'97% break probability — missing give-up account',ddl:'15:30 give-up cut-off',
-    cause:'The trade is flagged for **give-up** to carrying broker BNS-CLEAR, but no give-up account / agreement is resolved on the golden event. CDCC will route the position to the executing broker’s **buffer account** at the 15:30 cut-off.',
+  ai:{head:'97% break probability — take-up unconfirmed',ddl:'15:30 give-up cut-off',
+    cause:'The trade is flagged for **give-up** to carrying broker BNS-CLEAR (account 450, agreement GU-2218), but the **take-up has not been accepted** on the golden event. CDCC will route the position to the executing broker’s **buffer account** at the 15:30 cut-off.',
     impact:'Position lands in the buffer account → a **front-vs-back position break** tomorrow AM → manual give-up correction + a CDCC adjustment. ~45 min investigation, plus reg-report amendment risk.',
-    fix:'Resolve give-up account 450 (carrying broker BNS-CLEAR; **take-up** confirmed) on the golden event before 15:30. FIOS propagates it to clearing, booking and the CIRO / NI 96-101 obligation automatically — **one fix, every downstream output.**'},
+    fix:'Obtain the **take-up confirmation** from BNS-CLEAR (account 450, agreement GU-2218) and apply it to the golden event before 15:30. FIOS propagates it to clearing, booking and the CIRO / NI 96-101 obligation automatically — **one fix, every downstream output.**'},
   sim:[['Golden Event','ok'],['Validation','ok'],['Give-Up Resolve','bad'],['CDCC Clearing','bad'],['Sub-Ledger','bad'],['Reg Report','bad']],oblig:['CIRO Trade Reporting','NI 96-101']},
 
- {id:'EVT-CRA-100455',inst:'CRA Dec-26',desc:'3-Month CORRA Future · Montréal Exchange',side:'SELL',qty:500,price:97.12,ccy:'CAD',
+ {id:'EVT-CRA-100455',trader:'u-mg',inst:'CRA Dec-26',desc:'3-Month CORRA Future · Montréal Exchange',side:'SELL',qty:500,price:97.12,ccy:'CAD',
   cpty:'Laurentian Rates Desk',lei:'549300ZK8N4FQ2L1XX',acct:'HOUSE-22',book:'FI-RATES-03',venue:'MX',ccp:'CDCC',uti:'CA549300…100455',cfi:'FFIXRS',mult:2500,
   status:'warning',prob:34,
   lifecycle:[['Executed','done','13:48:02'],['Allocated','warning','13:52:40'],['Confirmed','done','13:53:11'],['Cleared','done','13:55:07'],['Booked','pending','—'],['Instructed','pending','—']],
@@ -356,30 +405,30 @@ const TRADES=[
     fix:'Confirm the allocation for the residual 20 lots (suggested: HOUSE-22). FIOS revalidates and books the corrected projection — **no re-keying downstream.**'},
   sim:[['Golden Event','ok'],['Validation','ok'],['Allocation','bad'],['Sub-Ledger','bad'],['Settlement','ok'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
 
- {id:'EVT-OCX-100501',inst:'RY 145C Oct-26',desc:'Royal Bank Equity Call Option · Montréal Exchange',side:'BUY',qty:120,price:3.85,ccy:'CAD',
-  cpty:'Northwater Capital',lei:'549300AB12CD34EF56GH',acct:'CLIENT-7781',book:'EQ-OPT-02',venue:'MX',ccp:'CDCC',uti:'CA549300…100501',cfi:'OCASPS',mult:100,
+ {id:'EVT-OCX-100501',trader:'u-ol',inst:'RY 145C Oct-26',desc:'Royal Bank Equity Call Option · Montréal Exchange',side:'BUY',qty:120,price:3.85,ccy:'CAD',
+  cpty:'Northvale Capital',lei:'549300AB12CD34EF56G',acct:'CLIENT-7781',book:'EQ-OPT-02',venue:'MX',ccp:'CDCC',uti:'CA549300…100501',cfi:'OCASPS',mult:105,
   status:'break',prob:91,
   lifecycle:[['Executed','done','14:11:55'],['Allocated','done','14:12:20'],['Confirmed','done','14:12:48'],['Cleared','done','14:13:30'],['Booked','fail','—'],['Instructed','pending','—']],
   ai:{head:'91% break probability — stale product reference data',ddl:'CDCC clearing window',
-    cause:'The option series multiplier on the legacy booking feed is **stale (100)** versus the CDCC-effective contract adjustment from a recent **corporate action**. The golden event carries the corrected term; the booking feed does not.',
+    cause:'The option series multiplier on the legacy booking feed is **stale (100)** versus the CDCC-effective **adjusted multiplier (105)** from a recent **corporate action**. The golden event carries the corrected term; the booking feed does not.',
     impact:'Cleared notional and margin (**MERIS**) will mismatch CDCC by the multiplier delta → a margin-call dispute and a cleared-vs-booked break.',
     fix:'FIOS already holds the corrected **Product entity** (post corporate-action). Publish the golden event to the booking adapter to overwrite the stale multiplier — the validation gate then passes.'},
   sim:[['Golden Event','ok'],['Validation','ok'],['Product Ref','bad'],['CDCC Margin','bad'],['Booking','bad'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
 
- {id:'EVT-SXF-100509',inst:'SXF Sep-26',desc:'S&P/TSX 60 Index Future · Montréal Exchange',side:'SELL',qty:80,price:1284.60,ccy:'CAD',
+ {id:'EVT-SXF-100509',trader:'u-jt',inst:'SXF Sep-26',desc:'S&P/TSX 60 Index Future · Montréal Exchange',side:'SELL',qty:80,price:1284.60,ccy:'CAD',
   cpty:'Meridian Global Fund',lei:'549300MERIDIAN0FUND',acct:'GIVE-UP 450',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100509',cfi:'FFIXSX',mult:200,
   status:'healthy',prob:2,
   lifecycle:[['Executed','done','14:14:01'],['Allocated','done','14:14:25'],['Give-Up','done','14:14:51'],['Cleared','done','14:16:33'],['Booked','done','14:16:40'],['Instructed','done','14:17:02']],
   ai:null,sim:[['Golden Event','ok'],['Validation','ok'],['Give-Up','ok'],['CDCC Clearing','ok'],['Sub-Ledger','ok'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
 
- {id:'EVT-CGB-100460',inst:'CGB Dec-26',desc:'10-Year Gov’t of Canada Bond Future · MX',side:'BUY',qty:300,price:122.45,ccy:'CAD',
+ {id:'EVT-CGB-100460',trader:'u-mg',inst:'CGB Dec-26',desc:'10-Year Gov’t of Canada Bond Future · MX',side:'BUY',qty:300,price:122.45,ccy:'CAD',
   cpty:'Laurentian Rates Desk',lei:'549300ZK8N4FQ2L1XX',acct:'HOUSE-22',book:'FI-RATES-03',venue:'MX',ccp:'CDCC',uti:'CA549300…100460',cfi:'FFIXRS',mult:1000,
   status:'healthy',prob:4,
   lifecycle:[['Executed','done','13:30:10'],['Allocated','done','13:31:00'],['Confirmed','done','13:31:22'],['Cleared','done','13:33:05'],['Booked','done','13:33:11'],['Instructed','done','13:33:40']],
   ai:null,sim:[['Golden Event','ok'],['Validation','ok'],['Clearing','ok'],['Sub-Ledger','ok'],['Settlement','ok'],['Reg Report','ok']],oblig:['CIRO Trade Reporting','NI 96-101']},
 
- {id:'EVT-SXM-100488',inst:'SXM Sep-26',desc:'Mini S&P/TSX 60 Index Future · MX',side:'BUY',qty:140,price:1284.40,ccy:'CAD',
-  cpty:'Northwater Capital',lei:'549300AB12CD34EF56GH',acct:'CLIENT-7781',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100488',cfi:'FFIXSX',mult:50,
+ {id:'EVT-SXM-100488',trader:'u-jt',inst:'SXM Sep-26',desc:'Mini S&P/TSX 60 Index Future · MX',side:'BUY',qty:140,price:1284.40,ccy:'CAD',
+  cpty:'Northvale Capital',lei:'549300AB12CD34EF56G',acct:'CLIENT-7781',book:'EQ-DERIV-01',venue:'MX',ccp:'CDCC',uti:'CA549300…100488',cfi:'FFIXSX',mult:50,
   status:'warning',prob:28,
   lifecycle:[['Executed','done','14:06:44'],['Allocated','done','14:07:10'],['SSI Check','warning','14:08:01'],['Cleared','done','14:09:30'],['Booked','done','14:09:38'],['Instructed','pending','—']],
   ai:{head:'28% break probability — counterparty SSI not yet confirmed',ddl:'T+1 settlement',
@@ -394,7 +443,7 @@ const LENSES={
  'Middle Office':{accent:'validation & allocation',rows:function(t){return [['Validation',t.status==='break'?'FAILED':'PASSED'],['Allocation',t.id.indexOf('CRA')>-1?(t.status==='healthy'?'500 / 500 ✓':'480 / 500 (−20)'):t.status==='healthy'?'Fully allocated':'Confirmed'],['Give-Up / Take-Up',gu(t)],['Open Exceptions',t.status==='healthy'?'0':'1'],['Confirm Status',t.status==='healthy'?'Affirmed':'Pending'],['Control',t.status==='break'?'Held':'Released']];}},
  'Back Office':{accent:'settlement & accounting',rows:function(t){return [['Settlement',t.status==='healthy'?'Instructed':'On hold'],['Value Date','T+1'],['Cash Movement',fmtN(t)+' '+t.ccy],['Accounting Entry',t.status==='break'?'Suspense':'Posted (proj.)'],['Custodian',t.acct.indexOf('CLIENT')>-1?'CDS / Custodian':'House'],['Sub-Ledger',t.status==='break'?'Break':'Reconciled (internal)']];}},
  'Risk':{accent:'exposure & margin',rows:function(t){return [['Exposure',fmtN(t)+' '+t.ccy],['Initial Margin (MERIS)',m(notional(t)*0.062)+' '+t.ccy],['Variation Margin',(t.status==='healthy'?'+':'')+m(notional(t)*0.003)+' '+t.ccy],['Δ Sensitivity',t.cfi[0]==='O'?'0.52 / contract':'1.00 (linear)'],['Limit Usage',(20+(t.qty%37))+'% of desk'],['Stress (−10%)','−'+m(notional(t)*0.1)+' '+t.ccy]];}},
- 'Compliance':{accent:'obligations & surveillance',rows:function(t){return [['Reg Obligation','CIRO TR'],['Derivatives Data','NI 96-101'],['Report Status',t.status==='break'?'Blocked (pre-fix)':'Ready'],['Surveillance','No flag'],['Lineage','Golden event → report'],['Amendment Risk',t.status==='break'?'High':'None']];}},
+ 'Compliance':{accent:'obligations & surveillance',rows:function(t){return [['Reg Obligation','CIRO TR'],['Derivatives Data','NI 96-101'],['Report Status',(t.sim[t.sim.length-1][1]==='ok')?'Ready':'Blocked (pre-fix)'],['Surveillance','No flag'],['Lineage','Golden event → report'],['Amendment Risk',(t.sim[t.sim.length-1][1]==='ok')?'None':'High']];}},
  'Finance':{accent:'ledger, revenue & tax',rows:function(t){return [['GL Posting',t.status==='break'?'Suspense 999':'GL 1420 (proj.)'],['Commission',m(t.qty*1.25)+' '+t.ccy],['Exchange Fees',m(t.qty*0.45)+' '+t.ccy],['Revenue',t.status==='healthy'?m(t.qty*1.25)+' '+t.ccy:'Pending'],['Tax Treatment','Mark-to-market'],['Booking Entity','Manera (LEI 5493…)']];}},
 };
 function notional(t){return t.qty*t.price*t.mult;}
@@ -406,7 +455,7 @@ function cutoff(t){return t.ai?t.ai.ddl:null;}
 
 const ROLES=[['ops','◧','Operations'],['trader','◴','Trader'],['overview','▤','Overview'],['team','⚇','Team']];
 const TRADER_DESK='EQ-DERIV-01';
-let state={sel:TRADES[0].id,lens:'Front Office',filter:'all',role:'ops'};
+let state={sel:TRADES[0].id,lens:'Front Office',filter:'all',role:'ops',lifeview:'flower',breaksOnly:false,desk:'all',q:'',histCat:'all',histQ:''};
 let resolvedBreaks=0, resolvedRisk=0;
 const SYM={done:'✓',warning:'!',fail:'✕',pending:'·'};
 
@@ -427,6 +476,12 @@ function renderFilters(){
     FILTERS.map(function(f){return h('div',{class:'chip'+(state.filter===f[0]?' on':''),onclick:function(){state.filter=f[0];renderFilters();renderBlotter();}},
       f[2]?h('span',{class:'dot '+f[2]}):null, f[1]);})));
 }
+const DESKS=[['all','All'],['EQ-DERIV-01','EQ-DERIV'],['FI-RATES-03','FI-RATES'],['EQ-OPT-02','EQ-OPT']];
+function renderFilters2(){
+  mount('filters2', h('div',{style:'display:flex;gap:6px;align-items:center;width:100%'},
+    DESKS.map(function(d){return h('div',{class:'chip'+(state.desk===d[0]?' on':''),text:d[1],onclick:function(){state.desk=d[0];renderFilters2();renderBlotter();}});}),
+    h('input',{class:'qs',placeholder:'Search…',value:state.q,oninput:function(e){state.q=e.target.value;renderBlotter();}})));
+}
 function renderPQHead(){
   var base=state.role==='trader'?TRADES.filter(function(t){return t.book===TRADER_DESK;}):TRADES;
   var wb=base.filter(function(t){return t.status==='break';}).length;
@@ -442,6 +497,9 @@ function renderPQHead(){
 function blotterTrades(){
   var list = state.filter==='all'?TRADES:TRADES.filter(function(t){return t.status===state.filter;});
   if(state.role==='trader') list=list.filter(function(t){return t.book===TRADER_DESK;});
+  if(state.desk!=='all') list=list.filter(function(t){return t.book===state.desk;});
+  var q=state.q.toLowerCase();
+  if(q) list=list.filter(function(t){var tr=t.trader?member(t.trader):null;return (t.id+' '+t.inst+' '+t.cpty+' '+t.book+(tr?' '+tr.name:'')).toLowerCase().indexOf(q)>-1;});
   return list;
 }
 function renderBlotter(){
@@ -456,7 +514,7 @@ function renderBlotter(){
       h('div',{class:'r1b'}, h('span',{class:'id',text:t.id}), t.assignee?h('span',{class:'avmini',title:'Assigned — '+member(t.assignee).name,text:member(t.assignee).init}):null, co?h('span',{class:'cutoff',text:'⏱ '+co}):null));
   })));
 }
-function select(id){ state.sel=id; state.lens='Front Office'; if(state.role==='overview'||state.role==='team')state.role='ops'; if(state.role==='trader'){var tt=TRADES.find(function(x){return x.id===id;}); if(tt&&tt.book!==TRADER_DESK)state.role='ops';} render(); }
+function select(id){ state.sel=id; state.lens='Front Office'; state.breaksOnly=false; if(state.role==='overview'||state.role==='team')state.role='ops'; if(state.role==='trader'){var tt=TRADES.find(function(x){return x.id===id;}); if(tt&&tt.book!==TRADER_DESK)state.role='ops';} render(); }
 function trade(){return TRADES.find(function(t){return t.id===state.sel;});}
 
 function render(){
@@ -498,20 +556,33 @@ function renderDetail(){
   if(!t){mount('right',h('div',{style:'padding:40px;color:var(--faint)'},'Select a trade'));return;}
   var secs=[];
   secs.push(h('div',{class:'sec'},
-    h('h3',{}, h('span',{class:'n',text:'01'}),' Trade Lifecycle ', h('span',{class:'hint',text:'— one event, one truth, end to end'})),
-    timeline(t)));
+    h('h3',{}, h('span',{class:'n',text:'01'}),' Trade Lifecycle ',
+      h('span',{class:'hint',text:state.lifeview==='flower'?'— the golden event is the seed; facets complete in any order':'— sequence view'}),
+      h('span',{style:'margin-left:auto;display:flex;gap:5px'},
+        h('span',{class:'vtog'+(state.lifeview==='flower'?' on':''),text:'✿ Flower',onclick:function(){state.lifeview='flower';renderDetail();}}),
+        h('span',{class:'vtog'+(state.lifeview!=='flower'?' on':''),text:'→ Sequence',onclick:function(){state.lifeview='line';renderDetail();}}),
+        state.lifeview==='flower'?h('span',{class:'vtog warn'+(state.breaksOnly?' on':''),text:'◉ Issues only',onclick:function(){state.breaksOnly=!state.breaksOnly;renderDetail();}}):null)),
+    state.lifeview==='flower'?flowerView(t):timeline(t)));
   if(t.ai)secs.push(h('div',{class:'sec'}, h('h3',{}, h('span',{class:'n',text:'02'}),' AI Exception Explainer'), aiBox(t)));
   secs.push(h('div',{class:'sec'}, h('h3',{}, h('span',{class:'n',text:t.ai?'03':'02'}),' Digital Twin — Downstream Simulation ', h('span',{class:'hint',text:'— before it reaches clearing'})), simBox(t)));
   secs.push(h('div',{class:'sec'}, h('h3',{}, h('span',{class:'n',text:t.ai?'04':'03'}),' Department Lenses ', h('span',{class:'hint',text:'— same golden event, every desk’s view'})), lensBox(t)));
-  secs.push(h('div',{class:'sec',style:'border-bottom:none'},
+  secs.push(h('div',{class:'sec'},
     h('h3',{}, h('span',{class:'n',text:t.ai?'05':'04'}),' Golden Financial Event ', h('span',{class:'hint',text:'— the single stored truth; everything above is a projection of it'})),
     geBox(t),
     h('div',{class:'note'}, rich('**Entity · Event · Projection.** FIOS stores only the validated Financial Event and the reference Entities (LEI, account, product, give-up agreement, obligation). Position, P&L, margin, settlement instruction, ledger entry and the regulatory report are all **derived** from it on demand — never copied. This is why **internal** reconciliation disappears; **external** reconciliation to CDCC / custodians is **reduced** to one clean-source check.'))));
+  secs.push(h('div',{class:'sec',style:'border-bottom:none'},
+    h('h3',{}, h('span',{class:'n',text:t.ai?'06':'05'}),' Event History — Full Lineage ', h('span',{class:'hint',text:'— bitemporal, append-only; every touch, human or system, pullable live'})),
+    histBox(t)));
   mount('right', h('div',{class:'detail'},
     h('div',{class:'dhead'}, h('div',{class:'top'},
       h('div',{}, h('h2',{text:t.inst}), h('div',{class:'meta',text:t.desc}),
         h('div',{class:'meta',style:'margin-top:6px',text:t.id+' · '+t.side+' '+t.qty+' @ '+t.price.toFixed(2)+' '+t.ccy+' · '+t.cpty}),
-        t.assignee?h('div',{class:'asgline',text:'● Assigned — '+member(t.assignee).name+' · '+member(t.assignee).role}):null),
+        t.assignee?h('div',{class:'asgline',text:'● Assigned — '+member(t.assignee).name+' · '+member(t.assignee).role}):null,
+        t.trader?h('div',{class:'tcard',onclick:function(){openTeamChat('front');}},
+          h('span',{class:'av2',text:member(t.trader).init}),
+          h('div',{},
+            h('div',{class:'tnm'},h('span',{class:'pres '+member(t.trader).presence}),member(t.trader).name,h('span',{class:'tid',text:'· '+member(t.trader).tid})),
+            h('div',{class:'tct',text:member(t.trader).role+' · '+member(t.trader).contact+' · open desk channel'}))):null),
       h('div',{class:'right-tag'}, h('div',{class:'prob s-'+t.status,text:t.status==='healthy'?'✓':t.prob+'%'}),
         h('div',{class:'prob-l',text:t.status==='healthy'?'clean · settled':'break probability'})))),
     secs));
@@ -519,6 +590,124 @@ function renderDetail(){
 function timeline(t){
   return h('div',{class:'timeline'}, h('div',{class:'tbar'}),
     t.lifecycle.map(function(s){return h('div',{class:'stage '+s[1]}, h('div',{class:'node',text:SYM[s[1]]}), h('div',{class:'sn',text:s[0]}), h('div',{class:'st',text:s[2]}));}));
+}
+
+/* ===== Flower-of-Life lifecycle (radial, order-agnostic, break-centric) ===== */
+function sv(tag,attrs){
+  var e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  if(attrs)for(var k in attrs){ if(k.slice(0,2)==='on')e.addEventListener(k.slice(2).toLowerCase(),attrs[k]); else e.setAttribute(k,attrs[k]); }
+  for(var i=2;i<arguments.length;i++){ var kid=arguments[i]; if(kid==null)continue;
+    if(Array.isArray(kid))kid.forEach(function(x){if(x!=null)e.appendChild(x);}); else e.appendChild(kid); }
+  return e;
+}
+function facets(t){
+  var f=t.lifecycle.slice(1).map(function(s){return {name:s[0],st:s[1],time:s[2]};});
+  var rr=t.sim[t.sim.length-1];
+  f.push({name:'Reg Report',st:rr[1]==='ok'?'done':'fail',time:rr[1]==='ok'?'ready':'held'});
+  return f;
+}
+function flowerView(t){
+  var fs=facets(t);
+  var cx=320,cy=230,R=86,D=128;
+  function dimmed(f){return state.breaksOnly&&f.st!=='fail'&&f.st!=='warning';}
+  var kids=[];
+  fs.forEach(function(f,i){var a=(-90+i*60)*Math.PI/180;var x=cx+D*Math.cos(a),y=cy+D*Math.sin(a);
+    kids.push(sv('line',{x1:cx,y1:cy,x2:x,y2:y,'class':'fline'+(dimmed(f)?' dim':'')}));});
+  fs.forEach(function(f,i){var a=(-90+i*60)*Math.PI/180;var x=cx+D*Math.cos(a),y=cy+D*Math.sin(a);
+    var g=sv('g',{'class':(dimmed(f)?'dim':''),style:(f.st==='fail'||f.st==='warning')?'cursor:pointer':'',
+      onclick:function(){if(f.st==='fail'||f.st==='warning'){var ai=document.querySelector('.ai');if(ai)ai.scrollIntoView({behavior:'smooth'});}}},
+      sv('circle',{cx:x,cy:y,r:R,'class':'fc fc-'+f.st+(f.st==='fail'?' fpulse':'')}),
+      sv('text',{x:x,y:y-8,'class':'flab','text-anchor':'middle'},document.createTextNode(f.name)),
+      sv('text',{x:x,y:y+10,'class':'ftime','text-anchor':'middle'},document.createTextNode(f.time)),
+      sv('text',{x:x,y:y+30,'class':'fst fs-'+f.st,'text-anchor':'middle'},document.createTextNode(f.st==='done'?'✓':f.st==='warning'?'!':f.st==='fail'?'✕':'·')));
+    kids.push(g);});
+  kids.push(sv('g',{},
+    sv('circle',{cx:cx,cy:cy,r:64,'class':'fcenter'}),
+    sv('text',{x:cx,y:cy-16,'class':'fclab','text-anchor':'middle'},document.createTextNode('GOLDEN EVENT')),
+    sv('text',{x:cx,y:cy+2,'class':'ftime','text-anchor':'middle'},document.createTextNode(t.id)),
+    sv('text',{x:cx,y:cy+19,'class':'ftime','text-anchor':'middle'},document.createTextNode('executed '+t.lifecycle[0][2])),
+    sv('text',{x:cx,y:cy+38,'class':'fst '+(t.status==='break'?'fs-fail':t.status==='warning'?'fs-warning':'fs-done'),'text-anchor':'middle'},
+      document.createTextNode(t.status==='break'?'break predicted':t.status==='warning'?'at risk':'coherent ✓'))));
+  return h('div',{class:'sim'},
+    sv('svg',{viewBox:'0 0 640 460','class':'flowersvg'},kids),
+    h('div',{class:'note',style:'margin-top:4px'},rich('**The seed and the petals.** The golden event is the seed at the center; most facets complete **in whatever order the day brings them** — no forced pipeline, and every derived facet is a projection of the same one truth. Legend: **✓** complete · **!** at risk · **✕** breaking · dashed = pending. **Red is all you need to watch.**')));
+}
+
+/* ===== Forensic event history (bitemporal, append-only) ===== */
+function clockNow(){return document.getElementById('clock').textContent.replace(' ET','');}
+function minsToCutoff(){var p=clockNow().split(':');var d=(15*60+30)-(parseInt(p[0],10)*60+parseInt(p[1],10));if(d<=0)return 'at the cut-off';return Math.floor(d/60)+'h'+('0'+(d%60)).slice(-2)+' before the cut-off';}
+const HIST={
+ 'EVT-SXF-100482':[
+  {t:'14:02:11',cat:'sys',type:'CAPTURE',actor:'MX drop-copy',det:'TradeExecuted received from Montréal Exchange — fill 250 @ 1284.40'},
+  {t:'14:02:11',cat:'sys',type:'VALIDATE',actor:'FIOS rules',det:'Schema + economics validated · version sealed + hashed (bitemporal)'},
+  {t:'14:02:12',cat:'sys',type:'ENRICH',actor:'FIOS entities',det:'LEI resolved · product **SXF Sep-26** bound · CDCC member map applied'},
+  {t:'14:05:33',cat:'human',type:'ALLOCATE',actor:'J. Tremblay · TRD-2214',det:'Desk allocation entered — flagged **give-up to BNS-CLEAR** (acct 450), take-up acceptance pending'},
+  {t:'14:05:34',cat:'exc',type:'EXCEPTION',actor:'FIOS AI',det:'Predicted break **97%** — take-up unconfirmed · cut-off **15:30** · twin run #4188'},
+ ],
+ 'EVT-CRA-100455':[
+  {t:'13:48:02',cat:'sys',type:'CAPTURE',actor:'MX drop-copy',det:'TradeExecuted — SELL 500 CRA Dec-26 @ 97.12'},
+  {t:'13:48:02',cat:'sys',type:'VALIDATE',actor:'FIOS rules',det:'Validated · version sealed (bitemporal)'},
+  {t:'13:52:40',cat:'human',type:'ALLOCATE',actor:'M. Girard · TRD-3318',det:'Split 300 / 180 across sub-accounts — **480 of 500**'},
+  {t:'13:52:41',cat:'exc',type:'EXCEPTION',actor:'FIOS AI',det:'Predicted break **34%** — 20-lot residual unallocated · EOD booking at risk'},
+  {t:'13:53:11',cat:'sys',type:'MATCH',actor:'FIOS gates',det:'House trade confirmed — no give-up applicable'},
+  {t:'13:55:07',cat:'sys',type:'CLEAR',actor:'CDCC feed',det:'Cleared · novated at CDCC (allocated portion)'},
+ ],
+ 'EVT-OCX-100501':[
+  {t:'14:11:55',cat:'sys',type:'CAPTURE',actor:'MX drop-copy',det:'TradeExecuted — BUY 120 RY 145C Oct-26 @ 3.85'},
+  {t:'14:11:56',cat:'sys',type:'ENRICH',actor:'FIOS entities',det:'Product entity carries corporate action **CA-2026-118** — adjusted multiplier'},
+  {t:'14:12:20',cat:'human',type:'ALLOCATE',actor:'O. Lam · TRD-3422',det:'Client allocation entered — CLIENT-7781'},
+  {t:'14:12:49',cat:'sys',type:'MATCH',actor:'FIOS gates',det:'Booking-feed comparison — legacy multiplier **stale** vs golden product entity'},
+  {t:'14:12:50',cat:'exc',type:'EXCEPTION',actor:'FIOS AI',det:'Predicted break **91%** — cleared-vs-booked mismatch · MERIS margin dispute risk'},
+  {t:'14:13:30',cat:'sys',type:'CLEAR',actor:'CDCC feed',det:'Cleared · novated at CDCC — booking projection held'},
+ ],
+ 'EVT-SXF-100509':[
+  {t:'14:14:01',cat:'sys',type:'CAPTURE',actor:'MX drop-copy',det:'TradeExecuted — SELL 80 @ 1284.60'},
+  {t:'14:14:25',cat:'human',type:'ALLOCATE',actor:'J. Tremblay · TRD-2214',det:'Desk allocation entered — give-up to BNS-CLEAR, account 450'},
+  {t:'14:14:51',cat:'sys',type:'MATCH',actor:'FIOS gates',det:'Give-up matched to agreement **GU-2218** · take-up account 450 confirmed'},
+  {t:'14:16:33',cat:'sys',type:'CLEAR',actor:'CDCC feed',det:'Cleared · novated at CDCC'},
+  {t:'14:17:02',cat:'sys',type:'INSTRUCT',actor:'FIOS projections',det:'Booking + settlement instruction projected · CIRO / NI 96-101 staged'},
+ ],
+ 'EVT-CGB-100460':[
+  {t:'13:30:10',cat:'sys',type:'CAPTURE',actor:'MX drop-copy',det:'TradeExecuted — BUY 300 @ 122.45'},
+  {t:'13:31:00',cat:'human',type:'ALLOCATE',actor:'M. Girard · TRD-3318',det:'House allocation — HOUSE-22'},
+  {t:'13:33:05',cat:'sys',type:'CLEAR',actor:'CDCC feed',det:'Cleared · house account HOUSE-22'},
+  {t:'13:33:40',cat:'sys',type:'INSTRUCT',actor:'FIOS projections',det:'Booked + instruction projected — clean end to end'},
+ ],
+ 'EVT-SXM-100488':[
+  {t:'14:06:44',cat:'sys',type:'CAPTURE',actor:'MX drop-copy',det:'TradeExecuted — BUY 140 @ 1284.40'},
+  {t:'14:07:10',cat:'human',type:'ALLOCATE',actor:'J. Tremblay · TRD-2214',det:'Client allocation entered — CLIENT-7781'},
+  {t:'14:07:55',cat:'sys',type:'ENRICH',actor:'FIOS entities',det:'Account entity notes **custodian change** — SSI re-confirmation pending'},
+  {t:'14:08:01',cat:'exc',type:'EXCEPTION',actor:'FIOS AI',det:'At-risk **28%** — provisional SSI on CLIENT-7781 · T+1 settlement watch'},
+  {t:'14:09:30',cat:'sys',type:'CLEAR',actor:'CDCC feed',det:'Cleared · novated at CDCC — no clearing impact from the SSI flag'},
+  {t:'14:09:38',cat:'sys',type:'BOOK',actor:'FIOS projections',det:'Booked · settlement instruction held pending SSI confirmation'},
+ ],
+};
+function histBox(t){
+  var rows=HIST[t.id]||[];
+  var cats=[['all','All'],['exc','Exceptions'],['amend','Amendments'],['human','Human'],['sys','System']];
+  var box=h('div',{class:'histbox'});
+  function paint(){
+    var q=state.histQ.toLowerCase();
+    var list=rows.filter(function(r){return (state.histCat==='all'||r.cat===state.histCat)&&(!q||(r.t+' '+r.type+' '+r.actor+' '+r.det).toLowerCase().indexOf(q)>-1);});
+    box.replaceChildren(h('div',{},
+      list.map(function(r){return h('div',{class:'hrow'},
+        h('span',{class:'ht',text:r.t}),
+        h('span',{class:'htype c-'+r.cat,text:r.type}),
+        h('span',{class:'hactor',text:r.actor}),
+        h('span',{class:'hdet'},rich(r.det)));}),
+      list.length?null:h('div',{class:'hrow'},h('span',{class:'ht'}),h('span',{}),h('span',{}),h('span',{class:'hdet',text:'No events match the filter.'}))));
+  }
+  var chipRow=h('div',{class:'lenstabs'});
+  function paintChips(){
+    var kids=cats.map(function(c){return h('div',{class:'lenstab'+(state.histCat===c[0]?' on':''),text:c[1],onclick:function(){state.histCat=c[0];paintChips();paint();}});});
+    kids.push(h('input',{class:'hq',placeholder:'Filter — actor, type, text…',value:state.histQ,oninput:function(e){state.histQ=e.target.value;paint();}}));
+    chipRow.replaceChildren.apply(chipRow,kids);
+  }
+  paint();paintChips();
+  return h('div',{},
+    chipRow,
+    box,
+    h('div',{class:'note'},rich('**Append-only.** Nothing is edited in place — corrections are new events with full provenance: who, when, from which system. This is the audit trail an investigator pulls **live**, not a report requested from IT. Acting on this trade (assigning, confirming over the FIOS Link, applying a fix) appends to this lineage in real time.')));
 }
 function aiBox(t){
   return h('div',{class:'ai'},
@@ -558,13 +747,14 @@ function S(s){return h('span',{class:'str',text:s});}
 function N(s){return h('span',{class:'num',text:String(s)});}
 function P(s){return h('span',{class:'pun',text:s});}
 function C(s){return h('span',{class:'cm',text:s});}
+function hstub(t){var x=0;for(var i=0;i<t.id.length;i++)x=(x*31+t.id.charCodeAt(i))%65536;return ('0000'+x.toString(16)).slice(-4);}
 function geBox(t){
   return h('div',{class:'ge'},
     geLine(P('{')),
     geLine('  ',K('"eventId"'),P(': '),S('"'+t.id+'"'),P(',')),
     geLine('  ',K('"eventType"'),P(': '),S('"TradeExecuted"'),P(',')),
     geLine('  ',K('"businessTime"'),P(': '),S('"2026-09-14T'+t.lifecycle[0][2]+'-04:00"'),P(',')),
-    geLine('  ',K('"recordTime"'),P(': '),S('"2026-09-14T14:18:01-04:00"'),P(',  '),C('// bitemporal')),
+    geLine('  ',K('"recordTime"'),P(': '),S('"2026-09-14T'+t.lifecycle[0][2]+'-04:00"'),P(',  '),C('// bitemporal — captured at source')),
     geLine('  ',K('"legalEntity"'),P(': '),S('"LEI:5493001MANERA00TECH"'),P(',')),
     geLine('  ',K('"counterparty"'),P(': { '),K('"id"'),P(':'),S('"LEI:'+t.lei+'"'),P(', '),K('"name"'),P(':'),S('"'+t.cpty+'"'),P(' },')),
     geLine('  ',K('"account"'),P(': '),S('"'+t.acct+'"'),P(',')),
@@ -572,15 +762,17 @@ function geBox(t){
     geLine('  ',K('"economics"'),P(': { '),K('"side"'),P(':'),S('"'+t.side+'"'),P(', '),K('"qty"'),P(':'),N(t.qty),P(', '),K('"price"'),P(':'),N(t.price),P(', '),K('"ccy"'),P(':'),S('"'+t.ccy+'"'),P(' },')),
     geLine('  ',K('"clearing"'),P(': { '),K('"ccp"'),P(':'),S('"'+t.ccp+'"'),P(', '),K('"uti"'),P(':'),S('"'+t.uti+'"'),P(' },')),
     geLine('  ',K('"obligations"'),P(': ['),S('"'+t.oblig.join('", "')+'"'),P('],')),
-    geLine('  ',K('"integrity"'),P(': { '),K('"hash"'),P(':'),S('"sha256:9f2c…"'),P(', '),K('"validated"'),P(':'),N(t.status!=='break'),P(' }')),
+    geLine('  ',K('"integrity"'),P(': { '),K('"hash"'),P(':'),S('"sha256:'+hstub(t)+'…"'),P(', '),K('"validated"'),P(':'),N(t.status!=='break'),P(' }')),
     geLine(P('}')));
 }
 function resolve(id){
   var t=TRADES.find(function(x){return x.id===id;});
   if(t.status==='break')resolvedBreaks++; else if(t.status==='warning')resolvedRisk++;
-  t.status='healthy';t.prob=2;t.ai=null;
-  t.lifecycle=t.lifecycle.map(function(s){return [s[0],'done',s[2]==='—'?'14:18:30':s[2]];});
+  t.status='healthy';t.prob=2;t.ai=null;state.breaksOnly=false;
+  t.lifecycle=t.lifecycle.map(function(s){return [s[0],'done',s[2]==='—'?clockNow():s[2]];});
   t.sim=t.sim.map(function(s){return [s[0],'ok'];});
+  if(HIST[id]){HIST[id].push({t:clockNow(),cat:'amend',type:'AMEND',actor:'FIOS golden store',det:'Fix applied on the golden event — new version sealed, prior version retained (bitemporal)'});
+  HIST[id].push({t:clockNow(),cat:'sys',type:'PROJECT',actor:'FIOS projections',det:'Downstream projections regenerated — clearing · booking · margin · CIRO / NI 96-101'});}
   render();
   toast('Fix applied on the golden event — propagated to clearing, booking & the CIRO / NI 96-101 obligation.');
 }
@@ -596,15 +788,17 @@ function toast(msg){
 /* ===== Team, accountability routing & chat (incl. cross-firm FIOS Link) ===== */
 const EXC_TYPE={'EVT-SXF-100482':'give-up','EVT-CRA-100455':'allocation','EVT-OCX-100501':'refdata','EVT-SXM-100488':'ssi'};
 const TEAM=[
- {id:'u-iv',name:'Isabelle Veilleux',init:'IV',role:'Head of Operations',dept:'Operations',line:'All',resp:'Escalation owner — all business lines',presence:'online',tier:1},
- {id:'u-mb',name:'Marc Bélanger',init:'MB',role:'Ops Manager — Listed Derivatives',dept:'Operations',line:'EQ-DERIV-01',resp:'Give-up / take-up & clearing breaks',presence:'online',tier:2,specialties:['give-up']},
- {id:'u-sl',name:'Sophie Lavoie',init:'SL',role:'Ops Analyst',dept:'Operations',line:'EQ-DERIV-01',resp:'Give-ups, allocations & CDCC buffer',presence:'online',tier:3,specialties:['give-up','allocation']},
- {id:'u-ak',name:'Amir Khalil',init:'AK',role:'Ops Analyst',dept:'Operations',line:'FI-RATES-03',resp:'Rates allocations & SSI follow-ups',presence:'away',tier:3,specialties:['allocation','ssi']},
- {id:'u-pd',name:'Priya Desai',init:'PD',role:'Product Data Steward',dept:'Middle Office',line:'All',resp:'Security master & corporate actions',presence:'online',tier:0,specialties:['refdata']},
- {id:'u-lm',name:'Luc Morin',init:'LM',role:'Settlements Officer',dept:'Back Office',line:'All',resp:'SSIs & custodian instructions',presence:'online',tier:0,specialties:['ssi']},
- {id:'u-jt',name:'Jean Tremblay',init:'JT',role:'Trader — Equity Derivatives',dept:'Front Office',line:'EQ-DERIV-01',resp:'SXF / SXM execution',presence:'online',tier:0},
- {id:'u-nc',name:'Nadia Chen',init:'NC',role:'Compliance Officer',dept:'Compliance',line:'All',resp:'CIRO trade reporting & NI 96-101',presence:'online',tier:0},
- {id:'u-rg',name:'Renée Gagnon',init:'RG',role:'Risk Manager',dept:'Risk',line:'All',resp:'MERIS margin & desk limits',presence:'online',tier:0},
+ {id:'u-iv',name:'Isabelle Veilleux',init:'IV',role:'Head of Operations',dept:'Operations',line:'All',resp:'Escalation owner — all business lines',presence:'online',tier:1,contact:'x4101 · i.veilleux@dealer.demo'},
+ {id:'u-mb',name:'Marc Bélanger',init:'MB',role:'Ops Manager — Listed Derivatives',dept:'Operations',line:'EQ-DERIV-01',resp:'Give-up / take-up & clearing breaks',presence:'online',tier:2,specialties:['give-up'],contact:'x4180 · m.belanger@dealer.demo'},
+ {id:'u-sl',name:'Sophie Lavoie',init:'SL',role:'Ops Analyst',dept:'Operations',line:'EQ-DERIV-01',resp:'Give-ups, allocations & CDCC buffer',presence:'online',tier:3,specialties:['give-up','allocation'],contact:'x4188 · s.lavoie@dealer.demo'},
+ {id:'u-ak',name:'Amir Khalil',init:'AK',role:'Ops Analyst',dept:'Operations',line:'FI-RATES-03',resp:'Rates allocations & SSI follow-ups',presence:'away',tier:3,specialties:['allocation','ssi'],contact:'x4187 · a.khalil@dealer.demo'},
+ {id:'u-pd',name:'Priya Desai',init:'PD',role:'Product Data Steward',dept:'Middle Office',line:'All',resp:'Security master & corporate actions',presence:'online',tier:0,specialties:['refdata'],contact:'x4520 · p.desai@dealer.demo'},
+ {id:'u-lm',name:'Luc Morin',init:'LM',role:'Settlements Officer',dept:'Back Office',line:'All',resp:'SSIs & custodian instructions',presence:'online',tier:0,specialties:['ssi'],contact:'x4610 · l.morin@dealer.demo'},
+ {id:'u-jt',name:'Jean Tremblay',init:'JT',tid:'TRD-2214',role:'Trader — Equity Derivatives',dept:'Front Office',line:'EQ-DERIV-01',resp:'SXF / SXM execution',presence:'online',tier:0,contact:'x2214 · j.tremblay@dealer.demo'},
+ {id:'u-mg',name:'Marie Girard',init:'MG',tid:'TRD-3318',role:'Trader — Rates',dept:'Front Office',line:'FI-RATES-03',resp:'CRA / CGB execution',presence:'online',tier:0,contact:'x3318 · m.girard@dealer.demo'},
+ {id:'u-ol',name:'Olivier Lam',init:'OL',tid:'TRD-3422',role:'Trader — Equity Options',dept:'Front Office',line:'EQ-OPT-02',resp:'Single-name options execution',presence:'online',tier:0,contact:'x3422 · o.lam@dealer.demo'},
+ {id:'u-nc',name:'Nadia Chen',init:'NC',role:'Compliance Officer',dept:'Compliance',line:'All',resp:'CIRO trade reporting & NI 96-101',presence:'online',tier:0,contact:'x4710 · n.chen@dealer.demo'},
+ {id:'u-rg',name:'Renée Gagnon',init:'RG',role:'Risk Manager',dept:'Risk',line:'All',resp:'MERIS margin & desk limits',presence:'online',tier:0,contact:'x4810 · r.gagnon@dealer.demo'},
 ];
 function member(id){return TEAM.find(function(p){return p.id===id;});}
 function openItems(p){return TRADES.filter(function(t){return t.assignee===p.id&&t.status!=='healthy';}).length;}
@@ -645,6 +839,7 @@ function openAssign(id){
 function closeAssign(){document.getElementById('assignmodal').classList.remove('on');refreshOverlay();}
 function assign(t,p){
   t.assignee=p.id; closeAssign();
+  if(HIST[t.id])HIST[t.id].push({t:clockNow(),cat:'human',type:'ASSIGN',actor:'FIOS routing',det:'Exception routed to **'+p.name+'** ('+p.role+') — mandate: '+EXC_TYPE[t.id]});
   pushChat('ops',{side:'sys',text:'FIOS routed **'+t.id+'** ('+EXC_TYPE[t.id]+') to **'+p.name+'** — '+p.role+'.'});
   toast('Assigned to '+p.name+' — notified in #ops-listed-derivatives.');
   render();
@@ -702,12 +897,14 @@ function renderTeamChat(){
 }
 function bnsReply(){
   setTimeout(function(){
-    pushChat('bns',{who:'M. Okafor — BNS-CLEAR Ops',init:'MO',ext:true,tag:'EXTERNAL',time:'14:20',text:'Confirmed on our node — give-up agreement **GU-2218** is active, take-up account **450**. Same golden event, same view on both sides. Apply when ready.',card:true});
+    pushChat('bns',{who:'M. Okafor — BNS-CLEAR Ops',init:'MO',ext:true,tag:'EXTERNAL',time:clockNow(),text:'Confirmed on our node — give-up agreement **GU-2218** is active, take-up account **450**. Same golden event, same view on both sides. Apply when ready.',card:true});
+    HIST['EVT-SXF-100482'].push({t:clockNow(),cat:'human',type:'CONFIRM',actor:'M. Okafor (BNS-CLEAR)',det:'Structured take-up confirmation received — agreement **GU-2218**, account **450**'});
   },1400);
 }
 function sendBnsRequest(){
   bnsSent=true;
-  pushChat('bns',{who:'Sophie Lavoie (you)',init:'SL',side:'out',time:'14:19',text:'Hi — **EVT-SXF-100482**, SXF Sep-26 BUY 250, flagged give-up to you. We’re missing the take-up confirmation on account **450** ahead of the **15:30 CDCC cut-off**. Can you confirm on your node?'});
+  HIST['EVT-SXF-100482'].push({t:clockNow(),cat:'human',type:'FIOS LINK',actor:'S. Lavoie ⇄ BNS-CLEAR',det:'Take-up confirmation requested on account **450** over the bilateral event-scoped link'});
+  pushChat('bns',{who:'Sophie Lavoie (you)',init:'SL',side:'out',time:clockNow(),text:'Hi — **EVT-SXF-100482**, SXF Sep-26 BUY 250, flagged give-up to you. We’re missing the take-up confirmation on account **450** ahead of the **15:30 CDCC cut-off**. Can you confirm on your node?'});
   renderTeamChat();
   bnsReply();
 }
@@ -722,7 +919,7 @@ function confCard(){
 }
 function applyFromChat(){
   resolve('EVT-SXF-100482');
-  pushChat('bns',{side:'sys',text:'✓ Applied — give-up resolved on **EVT-SXF-100482**, 1h10 before the cut-off. Clearing, booking and the CIRO / NI 96-101 report updated from the same golden event — on **both firms’** projections.'});
+  pushChat('bns',{side:'sys',text:'✓ Applied — give-up resolved on **EVT-SXF-100482**, '+minsToCutoff()+'. Clearing, booking and the CIRO / NI 96-101 report updated from the same golden event — on **both firms’** projections.'});
   renderTeamChat();
 }
 function sendTeamMsg(){
@@ -730,7 +927,7 @@ function sendTeamMsg(){
   pushChat(chatCh,{who:'You — Ops',init:'SL',side:'out',text:v});
   var sx=TRADES.find(function(x){return x.id==='EVT-SXF-100482';});
   if(chatCh==='bns'){
-    if(!bnsSent&&sx.status!=='healthy'){ bnsSent=true; bnsReply(); }
+    if(!bnsSent&&sx.status!=='healthy'){ bnsSent=true; HIST['EVT-SXF-100482'].push({t:clockNow(),cat:'human',type:'FIOS LINK',actor:'S. Lavoie ⇄ BNS-CLEAR',det:'Take-up confirmation requested over the bilateral event-scoped link'}); bnsReply(); }
     else setTimeout(function(){pushChat('bns',{who:'M. Okafor — BNS-CLEAR Ops',init:'MO',ext:true,tag:'EXTERNAL',time:'now',text:'We’re aligned on our side — same golden event, same view. Ping us if anything else flags before the cut-off.'});},1200);
   }
   renderTeamChat();
@@ -741,6 +938,7 @@ function renderTeam(){
     h('div',{class:'nm'},h('span',{class:'pres '+p.presence}),p.name),
     h('div',{class:'rl',text:p.role}),
     h('div',{class:'rs',text:p.resp}),
+    p.contact?h('div',{class:'tct',text:p.contact}):null,
     h('div',{class:'ln'},h('span',{text:p.line==='All'?'All business lines':p.line}),h('span',{class:'oi',text:openItems(p)?openItems(p)+' open':''})));};
   var tier=function(n){return TEAM.filter(function(p){return p.tier===n;});};
   var partners=TEAM.filter(function(p){return p.tier===0;});
@@ -816,9 +1014,9 @@ document.getElementById('tcinput').addEventListener('keydown',function(e){if(e.k
 document.getElementById('assignmodal').addEventListener('click',function(e){if(e.target===this)closeAssign();});
 
 var sec=2;
-setInterval(function(){sec++;var tot=18*60+sec;var hh=14+Math.floor(tot/3600),mm=Math.floor(tot/60)%60,ss=tot%60;document.getElementById('clock').textContent=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0')+' ET';},1000);
+setInterval(function(){sec++;var tot=18*60+sec;var hh=(14+Math.floor(tot/3600))%24,mm=Math.floor(tot/60)%60,ss=tot%60;document.getElementById('clock').textContent=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0')+' ET';},1000);
 
-renderFilters();render();
+renderFilters();renderFilters2();render();
 </script>
 </body>
 </html>
