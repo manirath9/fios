@@ -993,7 +993,7 @@ function renderTeam(){
 
 const QA=[
  {q:'Which trades will break today?',a:function(){var b=TRADES.filter(function(t){return t.status==='break';}),w=TRADES.filter(function(t){return t.status==='warning';});
-   return {nodes:rich('**'+b.length+' trades** are predicted to break before their cut-offs, plus '+w.length+' at-risk. FIOS flagged each at point-of-capture — all fixable upstream before they propagate:'),
+   return {nodes:rich('**'+b.length+' trade'+(b.length===1?'**':'s**')+(b.length===1?' is':' are')+' predicted to break before their cut-offs, plus '+w.length+' at-risk. FIOS flagged each at point-of-capture — all fixable upstream before they propagate:'),
      refs:b.map(function(t){return [t.id,t.inst+' — '+t.ai.head.replace(/^\d+% break probability — /,'')];})};}},
  {q:'Why will SXF Sep-26 (EVT-SXF-100482) break?',a:function(){var t=TRADES.find(function(x){return x.id==='EVT-SXF-100482';});
    if(t&&t.ai)return {nodes:[h('b',{text:t.ai.head+'.'}),h('br'),h('br')].concat(rich(t.ai.cause)).concat([h('br'),h('br'),h('span',{class:'fix',text:'Fix: '})]).concat(rich(t.ai.fix)),refs:[[t.id,'Open trade']]};
